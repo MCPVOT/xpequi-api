@@ -129,6 +129,32 @@ export interface CreatePaymentParams {
   method?: 'card' | 'transfer' | 'nequi' | 'daviplata' | 'cash'
 }
 
+export interface Visit {
+  id: string
+  propertyId: string
+  date: string
+  time: string
+  status: string
+  notes?: string
+  createdAt: string
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+}
+
+export interface ChatResponse {
+  response: string
+  sessionId?: string
+}
+
+export interface UploadResult {
+  url: string
+  fileName: string
+  size: number
+}
+
 // ─── Client ───────────────────────────────────────────────────────
 
 export class PequiClient {
@@ -162,6 +188,17 @@ export class PequiClient {
     const headers: Record<string, string> = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
     if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`
     const res = await fetch(`${this.baseUrl}${path}`, { method: 'POST', headers, body: JSON.stringify(body) })
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      throw new Error(`Pequi API ${res.status}: ${text.slice(0, 200)}`)
+    }
+    return res.json() as Promise<T>
+  }
+
+  private async postForm<T>(path: string, formData: FormData): Promise<T> {
+    const headers: Record<string, string> = { 'Accept': 'application/json' }
+    if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`
+    const res = await fetch(`${this.baseUrl}${path}`, { method: 'POST', headers, body: formData })
     if (!res.ok) {
       const text = await res.text().catch(() => '')
       throw new Error(`Pequi API ${res.status}: ${text.slice(0, 200)}`)
@@ -241,6 +278,31 @@ export class PequiClient {
   async getComplexUnits(slug: string): Promise<BuildingUnit[]> {
     const data = await this.get<any>(`/complexes/${slug}/units`)
     return data.data || data
+  }
+
+  // ── Visits ──────────────────────────────────────────────────────
+
+  async scheduleVisit(propertyId: string, date: string, time: string, notes?: string): Promise<Visit> {
+    return this.post<any>('/visits', { propertyId, date, time, notes })
+  }
+
+  async listMyVisits(): Promise<Visit[]> {
+    const data = await this.get<any>('/visits/mine')
+    return data.data || data
+  }
+
+  // ── Chat ────────────────────────────────────────────────────────
+
+  async sendMessage(message: string, sessionId?: string): Promise<ChatResponse> {
+    return this.post<any>('/chat', { message, sessionId })
+  }
+
+  // ── Uploads ─────────────────────────────────────────────────────
+
+  async uploadFile(file: File | Blob, fileName?: string): Promise<UploadResult> {
+    const formData = new FormData()
+    formData.append('file', file, fileName)
+    return this.postForm<any>('/upload', formData)
   }
 }
 
