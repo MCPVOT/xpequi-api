@@ -128,6 +128,20 @@ Pequi's API is available natively inside every major AI coding agent.
 
 All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
 
+## 🐍 Python SDK
+
+```bash
+pip install pequi-api-client
+```
+
+```python
+from pequi_api_client import PequiClient
+
+client = PequiClient(api_key="pk_live_abc...")
+properties = client.properties.search(city="ibague", limit=5)
+print(properties)
+```
+
 ## 📄 Licencia
 
 MIT © Pequi
