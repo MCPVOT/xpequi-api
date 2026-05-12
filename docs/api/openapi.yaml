@@ -1,0 +1,346 @@
+openapi: "3.0.3"
+info:
+  title: Pequi API
+  description: |
+    Colombia's first real estate data API.
+    Search properties, get neighborhood data, price benchmarks, geocode addresses,
+    generate Ley 820 contracts, create payments, and manage residential complexes.
+
+    [Developer Portal](https://xpequi.xyz/developers)
+    [Precios y Planes](https://xpequi.xyz/precios)
+    [Open Finance Decreto 0368](https://xpequi.xyz/blog/open-finance-decreto-0368)
+  version: "1.0.0"
+  contact:
+    name: Pequi
+    url: https://xpequi.xyz
+servers:
+  - url: https://xpequi.xyz/api/v1
+    description: Production server
+
+paths:
+  /properties:
+    get:
+      summary: Search properties
+      description: Search and filter real estate properties in Colombia
+      tags: [Properties]
+      parameters:
+        - name: city
+          in: query
+          schema: { type: string, default: ibague }
+          description: City name
+        - name: tipo
+          in: query
+          schema: { type: string, enum: [apartamento, casa, local, lote] }
+          description: Property type
+        - name: barrio
+          in: query
+          schema: { type: string }
+          description: Neighborhood name
+        - name: estrato
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 6 }
+          description: Socioeconomic stratum
+        - name: precio_min
+          in: query
+          schema: { type: number }
+          description: Minimum price in COP
+        - name: precio_max
+          in: query
+          schema: { type: number }
+          description: Maximum price in COP
+        - name: cuartos
+          in: query
+          schema: { type: integer }
+          description: Minimum bedrooms
+        - name: banos
+          in: query
+          schema: { type: integer }
+          description: Minimum bathrooms
+        - name: operacion
+          in: query
+          schema: { type: string, enum: [venta, arriendo] }
+          description: Listing operation type
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, maximum: 100 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        "200":
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Property"
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+
+  /barrios:
+    get:
+      summary: List neighborhoods
+      description: Get all neighborhoods for a city with estratos and coordinates
+      tags: [Neighborhoods]
+      parameters:
+        - name: city
+          in: query
+          schema: { type: string, default: ibague }
+      responses:
+        "200":
+          description: List of neighborhoods
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Barrio"
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+
+  /benchmarks:
+    get:
+      summary: Price benchmarks
+      description: Get average price per m² by barrio, property type, and estrato
+      tags: [Benchmarks]
+      parameters:
+        - name: barrio
+          in: query
+          schema: { type: string }
+        - name: tipo
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Price benchmarks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Benchmark"
+
+  /geocode:
+    get:
+      summary: Geocode address
+      description: Convert a Colombian address to latitude/longitude coordinates
+      tags: [Geocoding]
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema: { type: string, minLength: 3 }
+      responses:
+        "200":
+          description: Geocoded coordinates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/GeocodeResult"
+
+  /contracts:
+    post:
+      summary: Generate a Ley 820 contract
+      description: Generate a legally compliant rental contract under Colombian Ley 820/2003
+      tags: [Contracts]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateContractParams"
+      responses:
+        "200":
+          description: Generated contract
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Contract"
+        "400":
+          description: Missing required fields
+        "429":
+          description: Rate limit exceeded
+
+  /payments:
+    post:
+      summary: Create payment
+      description: Create a payment intent and get a Wompi checkout URL
+      tags: [Payments]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentParams"
+      responses:
+        "200":
+          description: Payment created with redirect URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      redirectUrl: { type: string }
+
+  /complexes:
+    get:
+      summary: List complexes
+      description: Get all residential complexes (conjuntos)
+      tags: [Complexes]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of complexes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Complex"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: api-key
+      description: |
+        API key obtained from the developer dashboard.
+        Use `pk_live_` prefixed keys.
+        FREE tier: 30 req/min. Upgrade at /precios.
+
+  schemas:
+    Property:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        address: { type: string }
+        city: { type: string }
+        propertyType: { type: string }
+        listingType: { type: string, enum: [SALE, RENT] }
+        bedrooms: { type: integer }
+        bathrooms: { type: integer }
+        area: { type: number }
+        salePrice: { type: number, nullable: true }
+        monthlyRent: { type: number, nullable: true }
+        description: { type: string, nullable: true }
+        images: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+
+    Barrio:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        estrato: { type: integer }
+        coordinates: { type: object, properties: { lat: { type: number }, lng: { type: number } }, nullable: true }
+        location: { type: string }
+        description: { type: string }
+
+    Benchmark:
+      type: object
+      properties:
+        tipo: { type: string }
+        precioPromedioM2: { type: number }
+        muestras: { type: integer }
+        source: { type: string }
+
+    GeocodeResult:
+      type: object
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+        displayName: { type: string }
+
+    GenerateContractParams:
+      type: object
+      required:
+        - landlordName
+        - landlordCedula
+        - tenantName
+        - tenantCedula
+        - propertyAddress
+        - rentAmount
+        - startDate
+        - endDate
+      properties:
+        landlordName: { type: string, description: "Full name of the landlord/propietario" }
+        landlordCedula: { type: string, description: "Colombian ID (cédula) of the landlord" }
+        tenantName: { type: string, description: "Full name of the tenant/arrendatario" }
+        tenantCedula: { type: string, description: "Colombian ID of the tenant" }
+        propertyAddress: { type: string }
+        propertyMatricula: { type: string, description: "Property registration number (optional)" }
+        rentAmount: { type: number, description: "Monthly rent in COP" }
+        currency: { type: string, default: "COP" }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        paymentDueDate: { type: integer, default: 5, description: "Day of month rent is due" }
+        utilityDeposit: { type: number, description: "Utility deposit (caucion de servicios), NOT security deposit (Ley 820)" }
+        additionalClauses: { type: string }
+
+    CreatePaymentParams:
+      type: object
+      required:
+        - userId
+        - amount
+      properties:
+        userId: { type: string }
+        propertyId: { type: string }
+        tenancyId: { type: string }
+        amount: { type: number }
+        paymentType: { type: string, default: "RENT" }
+        email: { type: string }
+        name: { type: string }
+        method: { type: string, enum: [card, transfer, nequi, daviplata, cash] }
+
+    Complex:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        address: { type: string }
+        city: { type: string }
+        amenities: { type: array, items: { type: string } }
+        totalUnits: { type: integer }
+        availableUnits: { type: integer }
+        images: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+
+    Meta:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+        cached: { type: boolean }

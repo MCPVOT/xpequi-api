@@ -1,5 +1,3 @@
-import { z } from 'zod'
-
 // ─── Types ────────────────────────────────────────────────────────
 
 export interface Property {
@@ -24,17 +22,16 @@ export interface Property {
 }
 
 export interface Barrio {
+  id: string
   name: string
   estrato: number
-  latitude: number
-  longitude: number
-  description?: string
+  coordinates?: { lat: number; lng: number } | null
+  location: string
+  description: string
 }
 
 export interface Benchmark {
-  barrio: string
   tipo: string
-  estrato: number
   precioPromedioM2: number
   precioMinM2: number
   precioMaxM2: number
@@ -46,6 +43,47 @@ export interface GeocodeResult {
   lng: number
   displayName: string
 }
+
+export interface Contract {
+  id: string
+  contractType: string
+  status: string
+  content: string
+  createdAt: string
+}
+
+export interface Payment {
+  id: string
+  amount: number
+  currency: string
+  status: string
+  redirectUrl?: string
+  createdAt: string
+}
+
+export interface Complex {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  address: string
+  city: string
+  amenities?: string[]
+  totalUnits?: number
+  availableUnits?: number
+  images?: string[]
+}
+
+export interface BuildingUnit {
+  id: string
+  unitNumber: string
+  floor?: number
+  status: string
+  monthlyRent?: number
+  salePrice?: number
+}
+
+// ─── Params ─────────────────────────────────────────────────────
 
 export interface PropertySearchParams {
   city?: string
@@ -65,6 +103,33 @@ export interface BenchmarkParams {
   barrio?: string
   tipo?: string
   estrato?: number
+}
+
+export interface GenerateContractParams {
+  landlordName: string
+  landlordCedula: string
+  tenantName: string
+  tenantCedula: string
+  propertyAddress: string
+  propertyMatricula?: string
+  rentAmount: number
+  currency?: string
+  startDate: string
+  endDate: string
+  paymentDueDate?: number
+  utilityDeposit?: number
+  additionalClauses?: string
+}
+
+export interface CreatePaymentParams {
+  userId: string
+  propertyId?: string
+  tenancyId?: string
+  amount: number
+  paymentType?: string
+  email?: string
+  name?: string
+  method?: 'card' | 'transfer' | 'nequi' | 'daviplata' | 'cash'
 }
 
 // ─── Client ───────────────────────────────────────────────────────
@@ -96,6 +161,19 @@ export class PequiClient {
     return res.json() as Promise<T>
   }
 
+  private async post<T>(path: string, body: unknown): Promise<T> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+    if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`
+    const res = await fetch(`${this.baseUrl}${path}`, { method: 'POST', headers, body: JSON.stringify(body) })
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      throw new Error(`Pequi API ${res.status}: ${text.slice(0, 200)}`)
+    }
+    return res.json() as Promise<T>
+  }
+
+  // ── Properties ──────────────────────────────────────────────────
+
   async searchProperties(params?: PropertySearchParams): Promise<Property[]> {
     const data = await this.get<any>('/properties', {
       city: params?.city || 'ibague',
@@ -110,23 +188,62 @@ export class PequiClient {
       limit: params?.limit?.toString() || '20',
       page: params?.page?.toString() || '1',
     })
-    return data.properties || data.data || data
+    return data.data || data.properties || data
   }
 
   async getBarrios(city = 'ibague'): Promise<Barrio[]> {
-    return this.get<Barrio[]>('/barrios', { city })
+    const data = await this.get<any>('/barrios', { city })
+    return data.data || data
   }
 
   async getBenchmarks(params?: BenchmarkParams): Promise<Benchmark[]> {
-    return this.get<Benchmark[]>('/benchmarks', {
+    const data = await this.get<any>('/benchmarks', {
       barrio: params?.barrio,
       tipo: params?.tipo,
       estrato: params?.estrato?.toString(),
     })
+    return data.data || data
   }
 
   async geocode(address: string): Promise<GeocodeResult> {
-    return this.get<GeocodeResult>('/geocode', { address })
+    const data = await this.get<any>('/geocode', { address })
+    return data.data || data
+  }
+
+  // ── Contracts ───────────────────────────────────────────────────
+
+  async generateContract(params: GenerateContractParams): Promise<Contract> {
+    const data = await this.post<any>('/contracts', params)
+    return data.data || data
+  }
+
+  // ── Payments ────────────────────────────────────────────────────
+
+  async createPayment(params: CreatePaymentParams): Promise<{ id: string; redirectUrl: string }> {
+    const data = await this.post<any>('/payments', params)
+    return data.data || data
+  }
+
+  async getPaymentStatus(paymentId: string): Promise<Payment> {
+    const data = await this.get<any>(`/payments?id=${paymentId}`)
+    return data.data || data
+  }
+
+  // ── Complexes ───────────────────────────────────────────────────
+
+  async getComplex(slug: string): Promise<Complex> {
+    const data = await this.get<any>(`/complexes/${slug}`)
+    return data.data || data
+  }
+
+  async listComplexes(): Promise<Complex[]> {
+    const data = await this.get<any>('/complexes')
+    return data.data || data
+  }
+
+  async getComplexUnits(slug: string): Promise<BuildingUnit[]> {
+    const data = await this.get<any>(`/complexes/${slug}/units`)
+    return data.data || data
   }
 }
 
