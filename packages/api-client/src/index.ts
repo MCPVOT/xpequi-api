@@ -45,11 +45,8 @@ export interface GeocodeResult {
 }
 
 export interface Contract {
-  id: string
-  contractType: string
-  status: string
-  content: string
-  createdAt: string
+  contractText: string
+  templateUsed: string
 }
 
 export interface Payment {

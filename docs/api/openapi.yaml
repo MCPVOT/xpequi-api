@@ -206,6 +206,22 @@ paths:
                       id: { type: string }
                       redirectUrl: { type: string }
 
+  /payments/{id}:
+    get:
+      summary: Get payment status
+      description: Check the status of a payment by ID
+      tags: [Payments]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Payment status
+
   /complexes:
     get:
       summary: List complexes
@@ -225,6 +241,38 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Complex"
+
+  /complexes/{slug}:
+    get:
+      summary: Get complex detail
+      description: Get a single residential complex by slug
+      tags: [Complexes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Complex detail
+
+  /complexes/{slug}/units:
+    get:
+      summary: List complex units
+      description: Get all units/building units in a complex
+      tags: [Complexes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of units
 
 components:
   securitySchemes:
