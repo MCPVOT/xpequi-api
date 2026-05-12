@@ -6,7 +6,7 @@
  */
 
 const REAL_ESTATE_KEYWORDS = [
-  'propiedad', 'propiedades', 'arriendo', 'arriendo',
+  'propiedad', 'propiedades', 'arriendo', 'renta',
   'apartamento', 'apartamentos', 'casa', 'casas',
   'barrio', 'barrios', 'ibagué', 'ibague',
   'inmueble', 'inmuebles', 'vivienda', 'viviendas',
