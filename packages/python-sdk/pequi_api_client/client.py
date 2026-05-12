@@ -156,6 +156,54 @@ class _ComplexesAPI:
         return data.get("data", data)
 
 
+class _VisitsAPI:
+    """Wrapper around GET/POST /api/v1/visits"""
+
+    def __init__(self, client: "PequiClient"):
+        self._client = client
+
+    def list(self) -> list[dict]:
+        data = self._client._get("/visits")
+        return data.get("data", data)
+
+    def schedule(self, property_id: str, date: str, notes: str = "") -> dict:
+        return self._client._post("/visits", {
+            "propertyId": property_id, "date": date, "notes": notes,
+        })
+
+
+class _ChatAPI:
+    """Wrapper around POST /api/v1/chat"""
+
+    def __init__(self, client: "PequiClient"):
+        self._client = client
+
+    def send(self, message: str) -> dict:
+        data = self._client._post("/chat", {"message": message})
+        return data.get("data", data)
+
+
+class _UploadAPI:
+    """Wrapper around POST /api/v1/upload"""
+
+    def __init__(self, client: "PequiClient"):
+        self._client = client
+
+    def upload(self, filepath: str) -> dict:
+        import os
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+        with open(filepath, "rb") as f:
+            import requests
+            url = f"{self._client._base_url}/upload"
+            headers = {"Accept": "application/json"}
+            if self._client._api_key:
+                headers["Authorization"] = f"Bearer {self._client._api_key}"
+            resp = requests.post(url, files={"file": f}, headers=headers, timeout=60)
+            resp.raise_for_status()
+            return resp.json().get("data", resp.json())
+
+
 class PequiClient:
     """
     Fluent client for the Pequi API (Colombian real estate data).
@@ -181,6 +229,9 @@ class PequiClient:
         self.contracts = _ContractsAPI(self)
         self.payments = _PaymentsAPI(self)
         self.complexes = _ComplexesAPI(self)
+        self.visits = _VisitsAPI(self)
+        self.chat = _ChatAPI(self)
+        self.upload = _UploadAPI(self)
 
     def _get(self, path: str, params: Optional[dict] = None) -> dict:
         import urllib.request
