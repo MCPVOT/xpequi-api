@@ -1,11 +1,23 @@
-# Pequi API — Colombia's First Real Estate Data API
+<p align="center">
+  <a href="https://xpequi.xyz">
+    <img src="https://xpequi.xyz/pequi-logo.svg" alt="Pequi" width="120" />
+  </a>
+</p>
 
-> **API pública de datos inmobiliarios para Ibagué y Colombia.**
-> Basado en Open Finance (Decreto 0368).
+<h1 align="center">Pequi API</h1>
 
-[![npm](https://img.shields.io/badge/npm-@MCPVOT%2Fapi--client-blue)](https://github.com/MCPVOT/xpequi-api/packages)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Website](https://img.shields.io/badge/web-xpequi.xyz-00e5ff)](https://xpequi.xyz)
+<p align="center">
+  <strong>Colombia's First Real Estate Data API</strong><br />
+  <em>API pública de datos inmobiliarios para Ibagué y Colombia</em><br />
+  Basado en Open Finance · <a href="https://xpequi.xyz/blog/open-finance-decreto-0368">Decreto 0368</a>
+</p>
+
+<p align="center">
+  <a href="https://xpequi.xyz"><img src="https://img.shields.io/badge/xpequi.xyz-00e5ff?style=flat-square&logo=vercel&logoColor=white" alt="Website" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fapi--client-blue?style=flat-square&logo=npm&logoColor=white" alt="npm" /></a>
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/Open%20Finance-Decreto%200368-ff8c00?style=flat-square" alt="Open Finance" />
+</p>
 
 ---
 
