@@ -225,7 +225,7 @@ export class PequiClient {
   }
 
   async getPaymentStatus(paymentId: string): Promise<Payment> {
-    const data = await this.get<any>(`/payments?id=${paymentId}`)
+    const data = await this.get<any>(`/payments/${paymentId}`)
     return data.data || data
   }
 
