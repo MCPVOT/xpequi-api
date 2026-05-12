@@ -1,0 +1,23 @@
+{
+  "name": "@MCPVOT/opencode-pequi-plugin",
+  "version": "1.0.0",
+  "description": "OpenCode plugin for Pequi — Colombian real estate data API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["opencode", "plugin", "pequi", "colombia", "real-estate"],
+  "license": "MIT",
+  "dependencies": {
+    "@MCPVOT/api-client": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": ["dist/"],
+  "publishConfig": {
+    "access": "public"
+  }
+}

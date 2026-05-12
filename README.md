@@ -112,6 +112,22 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 - [Blog: Decreto 0368](https://xpequi.xyz/blog/open-finance-decreto-0368) — Open Finance en Colombia
 - [Pequi App](https://xpequi.xyz) — Plataforma inmobiliaria con IA
 
+## 🤖 Supported AI Agents
+
+Pequi's API is available natively inside every major AI coding agent.
+
+| Agent | How to Connect | Install |
+|-------|---------------|---------|
+| **Claude Desktop** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **Claude Code** | MCP config | Add to `claude_desktop_config.json` ([docs](docs/claude-code-integration.md)) |
+| **Cursor** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **VS Code Copilot** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **OpenCode** | Plugin | `opencode plugin install @MCPVOT/opencode-pequi-plugin` |
+| **Ollama** | Custom Tool | Python function in `packages/ollama-tool/pequi_tool.py` |
+| **OpenClaw** | Gateway Plugin | JavaScript plugin in `packages/openclaw-plugin/pequi-gateway.js` |
+
+All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
+
 ## 📄 Licencia
 
 MIT © Pequi
