@@ -20,6 +20,7 @@ servers:
 paths:
   /properties:
     get:
+      operationId: searchProperties
       summary: Search properties
       description: Search and filter real estate properties in Colombia
       tags: [Properties]
@@ -83,6 +84,7 @@ paths:
 
   /barrios:
     get:
+      operationId: getBarrios
       summary: List neighborhoods
       description: Get all neighborhoods for a city with estratos and coordinates
       tags: [Neighborhoods]
@@ -107,6 +109,7 @@ paths:
 
   /benchmarks:
     get:
+      operationId: getBenchmarks
       summary: Price benchmarks
       description: Get average price per m² by barrio, property type, and estrato
       tags: [Benchmarks]
@@ -132,6 +135,7 @@ paths:
 
   /geocode:
     get:
+      operationId: geocode
       summary: Geocode address
       description: Convert a Colombian address to latitude/longitude coordinates
       tags: [Geocoding]
@@ -153,6 +157,7 @@ paths:
 
   /contracts:
     post:
+      operationId: generateContract
       summary: Generate a Ley 820 contract
       description: Generate a legally compliant rental contract under Colombian Ley 820/2003
       tags: [Contracts]
@@ -181,6 +186,7 @@ paths:
 
   /payments:
     post:
+      operationId: createPayment
       summary: Create payment
       description: Create a payment intent and get a Wompi checkout URL
       tags: [Payments]
@@ -208,6 +214,7 @@ paths:
 
   /payments/{id}:
     get:
+      operationId: getPaymentStatus
       summary: Get payment status
       description: Check the status of a payment by ID
       tags: [Payments]
@@ -224,6 +231,7 @@ paths:
 
   /complexes:
     get:
+      operationId: listComplexes
       summary: List complexes
       description: Get all residential complexes (conjuntos)
       tags: [Complexes]
@@ -244,6 +252,7 @@ paths:
 
   /complexes/{slug}:
     get:
+      operationId: getComplex
       summary: Get complex detail
       description: Get a single residential complex by slug
       tags: [Complexes]
@@ -260,6 +269,7 @@ paths:
 
   /complexes/{slug}/units:
     get:
+      operationId: getComplexUnits
       summary: List complex units
       description: Get all units/building units in a complex
       tags: [Complexes]
