@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pequi-api-client"
+version = "0.1.0"
+description = "Official Python SDK for the Pequi API — Colombian real estate data for developers"
+readme = "README.md"
+authors = [{ name = "MCPVOT", email = "dev@xpequi.xyz" }]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "urllib3>=2.0.0",
+    "python-dateutil>=2.8.0",
+    "certifi>=2024.0.0",
+]
+keywords = ["colombia", "real-estate", "ibague", "propiedades", "inmobiliario", "pequi"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://xpequi.xyz/developers"
+Repository = "https://github.com/MCPVOT/pequi"
+Documentation = "https://xpequi.xyz/developers/api-ref"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pequi_api_client*"]

@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+pequi_api_client/__init__.py
+pequi_api_client/client.py
+pequi_api_client/models.py
+pequi_api_client.egg-info/PKG-INFO
+pequi_api_client.egg-info/SOURCES.txt
+pequi_api_client.egg-info/dependency_links.txt
+pequi_api_client.egg-info/requires.txt
+pequi_api_client.egg-info/top_level.txt
