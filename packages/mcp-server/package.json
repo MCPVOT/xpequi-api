@@ -1,0 +1,50 @@
+{
+  "name": "@MCPVOT/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Pequi — Colombia's first real estate data API. Search properties, lookup neighborhoods, get price benchmarks, and geocode addresses in Ibagué.",
+  "author": "Pequi (xpequi.xyz)",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "pequi-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "colombia",
+    "real-estate",
+    "ibague",
+    "propiedades",
+    "inmobiliario",
+    "pequi"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MCPVOT/pequi.git",
+    "directory": "packages/mcp-server"
+  }
+}

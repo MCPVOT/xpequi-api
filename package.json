@@ -1,0 +1,23 @@
+{
+  "name": "xpequi-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pequi API — Colombia's first real estate data API",
+  "workspaces": [
+    "packages/api-client",
+    "packages/mcp-server"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:client": "npm run build -w packages/api-client",
+    "build:mcp": "npm run build -w packages/mcp-server",
+    "start:mcp": "npm run start -w packages/mcp-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MCPVOT/xpequi-api.git"
+  },
+  "homepage": "https://xpequi.xyz/developers",
+  "bugs": "https://github.com/MCPVOT/xpequi-api/issues",
+  "license": "MIT"
+}
