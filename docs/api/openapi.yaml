@@ -267,6 +267,31 @@ paths:
         "200":
           description: Complex detail
 
+  /avm:
+    post:
+      operationId: estimateValue
+      summary: Automated Valuation Model
+      description: Estimate a property's market value using heuristic rules (upgradeable to XGBoost)
+      tags: [AVM]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                area: { type: number, description: "Property area in m²" }
+                bedrooms: { type: integer }
+                bathrooms: { type: integer }
+                propertyType: { type: string, enum: [APARTMENT, HOUSE, COMMERCIAL, LAND, FARM, ROOM] }
+                barrio: { type: string }
+                city: { type: string, default: ibague }
+      responses:
+        "200":
+          description: Valuation result with confidence range and feature contributions
+
   /complexes/{slug}/units:
     get:
       operationId: getComplexUnits
