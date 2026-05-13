@@ -7,9 +7,11 @@ info:
     generate Ley 820 contracts, create payments, and manage residential complexes.
 
     [Developer Portal](https://xpequi.xyz/developers)
+    [AI Agents Guide](https://xpequi.xyz/developers/agents)
+    [Structured Error Reference](https://xpequi.xyz/developers/guides#errores)
     [Precios y Planes](https://xpequi.xyz/precios)
     [Open Finance Decreto 0368](https://xpequi.xyz/blog/open-finance-decreto-0368)
-  version: "1.0.0"
+  version: "1.1.0"
   contact:
     name: Pequi
     url: https://xpequi.xyz
