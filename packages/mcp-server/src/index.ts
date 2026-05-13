@@ -86,6 +86,7 @@ const GetBarriosSchema = z.object({
 })
 
 const GetBenchmarksSchema = z.object({
+  city: z.string().optional().describe('City (default: ibague)'),
   barrio: z.string().optional().describe('Neighborhood name'),
   tipo: z.enum(['apartamento', 'casa', 'local']).optional().describe('Property type'),
   estrato: z.coerce.number().min(1).max(6).optional().describe('Stratum'),
@@ -130,10 +131,11 @@ const TOOLS = [
   },
   {
     name: 'get_benchmarks',
-    description: `Get real estate price benchmarks for Colombian cities. Returns average, min, and max prices per square meter broken down by neighborhood, property type, and stratum. Essential for market analysis, investment decisions, and rental comparisons.`,
+    description: `Get real estate price benchmarks for Colombian cities. Returns average, min, and max prices per square meter broken down by neighborhood, property type, and stratum. Essential for market analysis, investment decisions, and rental comparisons. Supports Ibagué and Bogotá.`,
     inputSchema: {
       type: 'object',
       properties: {
+        city: { type: 'string', description: 'City slug: ibague, bogota (default: ibague)' },
         barrio: { type: 'string', description: 'Filter by neighborhood' },
         tipo: { type: 'string', enum: ['apartamento', 'casa', 'local'], description: 'Filter by property type' },
         estrato: { type: 'number', description: 'Filter by estrato (1-6)', minimum: 1, maximum: 6 },
@@ -208,6 +210,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'get_benchmarks': {
         const params = GetBenchmarksSchema.parse(args || {})
         const data = await apiGet('/benchmarks', {
+          city: params.city,
           barrio: params.barrio,
           tipo: params.tipo,
           estrato: params.estrato?.toString(),
