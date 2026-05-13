@@ -5,7 +5,7 @@
  *
  * Colombia's first real estate data API, accessible via the Model Context Protocol.
  * Enables AI assistants to search properties, lookup neighborhoods,
- * get price benchmarks, and geocode addresses in Ibagué, Tolima.
+ * get price benchmarks, and geocode addresses in Ibagué, Bogotá, and expanding cities.
  *
  * Usage:
  *   pequi-mcp              # stdio mode (for Cursor, Claude Desktop)
@@ -100,11 +100,11 @@ const GeocodeSchema = z.object({
 const TOOLS = [
   {
     name: 'search_properties',
-    description: `Search for properties in Ibagué (and soon all Colombia). Filter by type, neighborhood, price range, bedrooms, bathrooms, stratum, and transaction type. Returns paginated results with full property details including location, price, features, and GIS coordinates.`,
+    description: `Search for properties in Colombian cities (Ibagué, Bogotá, and expanding). Filter by type, neighborhood, price range, bedrooms, bathrooms, stratum, and transaction type. Returns paginated results with full property details including location, price, features, and GIS coordinates.`,
     inputSchema: {
       type: 'object',
       properties: {
-        city: { type: 'string', description: 'City (default: ibague)' },
+        city: { type: 'string', description: 'City slug: ibague, bogota, cali, medellin, barranquilla (default: ibague)' },
         tipo: { type: 'string', enum: ['apartamento', 'casa', 'local', 'oficina', 'lote', 'finca', 'habitacion'], description: 'Property type' },
         barrio: { type: 'string', description: 'Neighborhood name' },
         estrato: { type: 'number', description: 'Estrato (1-6)', minimum: 1, maximum: 6 },
@@ -120,17 +120,17 @@ const TOOLS = [
   },
   {
     name: 'get_barrios',
-    description: `Get all neighborhoods in Ibagué with their socioeconomic stratum (estrato), GIS coordinates, and general data. Use this to help users understand which neighborhood matches their needs and budget.`,
+    description: `Get all neighborhoods in a Colombian city with their socioeconomic stratum (estrato), GIS coordinates, and general data. Supports Ibagué (64 barrios), Bogotá (212 barrios), and expanding.`,
     inputSchema: {
       type: 'object',
       properties: {
-        city: { type: 'string', description: 'City (default: ibague)' },
+        city: { type: 'string', description: 'City slug: ibague, bogota (default: ibague)' },
       },
     },
   },
   {
     name: 'get_benchmarks',
-    description: `Get real estate price benchmarks for Ibagué. Returns average, min, and max prices per square meter broken down by neighborhood, property type, and stratum. Essential for market analysis, investment decisions, and rental comparisons.`,
+    description: `Get real estate price benchmarks for Colombian cities. Returns average, min, and max prices per square meter broken down by neighborhood, property type, and stratum. Essential for market analysis, investment decisions, and rental comparisons.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -142,11 +142,11 @@ const TOOLS = [
   },
   {
     name: 'geocode',
-    description: `Convert a human-readable address in Ibagué to GIS coordinates (latitude, longitude). Useful for mapping properties and understanding locations.`,
+    description: `Convert a human-readable address in Colombia to GIS coordinates (latitude, longitude). Useful for mapping properties and understanding locations.`,
     inputSchema: {
       type: 'object',
       properties: {
-        address: { type: 'string', description: 'Address to geocode (e.g., "Calle 10 #3-15, Ibagué")' },
+        address: { type: 'string', description: 'Address to geocode (e.g., "Calle 10 #3-15, Ibagué" or "Carrera 7 #72-40, Bogotá")' },
       },
       required: ['address'],
     },
@@ -251,7 +251,13 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
     {
       uri: 'pequi://ibague',
       name: 'Ibagué Metadata',
-      description: 'Complete metadata about Ibagué: neighborhoods, estratos, coordinates, and general city data.',
+      description: 'Complete metadata about Ibagué: 64 neighborhoods, estratos, coordinates, and general city data.',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'pequi://bogota',
+      name: 'Bogotá Metadata',
+      description: 'Complete metadata about Bogotá: 212 neighborhoods, estratos, coordinates, and general city data.',
       mimeType: 'application/json',
     },
     {
@@ -270,6 +276,17 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     switch (uri) {
       case 'pequi://ibague': {
         const data = await apiGet('/barrios', { city: 'ibague' })
+        return {
+          contents: [{
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(data, null, 2),
+          }],
+        }
+      }
+
+      case 'pequi://bogota': {
+        const data = await apiGet('/barrios', { city: 'bogota' })
         return {
           contents: [{
             uri,
