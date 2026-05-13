@@ -93,18 +93,31 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | `GET` | `/api/v1/properties` | Buscar propiedades (filtros: tipo, precio, barrio, estrato, cuartos) |
-| `GET` | `/api/v1/barrios` | Listar barrios de Ibagué con estrato y coordenadas |
+| `GET` | `/api/v1/barrios?city=ibague` | 64 barrios Ibagué |
+| `GET` | `/api/v1/barrios?city=bogota` | 212 barrios Bogotá 🅱️ |
 | `GET` | `/api/v1/benchmarks` | Precios de referencia por m² |
 | `GET` | `/api/v1/geocode` | Dirección → coordenadas |
+| `POST` | `/api/v1/contracts` | Generar contrato Ley 820 |
+| `POST` | `/api/v1/payments` | Crear pago Wompi |
+| `GET` | `/api/v1/payments/{id}` | Estado de pago |
+| `GET` | `/api/v1/complexes` | Listar conjuntos |
+| `GET` | `/api/v1/complexes/{slug}` | Detalle de conjunto |
+| `GET` | `/api/v1/complexes/{slug}/units` | Unidades de conjunto |
+| `POST` | `/api/v1/visits` | Agendar visita |
+| `POST` | `/api/v1/chat` | Chat con IA (DeepSeek + fallbacks) |
+| `POST` | `/api/v1/upload` | Subir archivo (max 5MB) |
+| `GET` | `/api/v1/monitoring/latency` | Latencia P50/P95/P99 |
+| `GET` | `/api/v1/monitoring/errors` | Errores 4xx/5xx por endpoint |
+| `GET` | `/api/v1/monitoring/uptime` | Estadísticas de disponibilidad |
 
 ## 💰 Precios
 
-| Tier | Precio | Límite | Para |
-|------|--------|--------|------|
-| **GRATIS** | $0/mes | 150 req/día | Developers probando |
-| **AGENTE** | $30K COP/mes | 1,000 req/día | Inmobiliarias |
-| **CONJUNTO** | $150K COP/mes | 5,000 req/día | Administradores |
-| **EMPRESARIAL** | Cotizar | 50K+ req/día | Bancos, fintechs |
+| Tier | Precio | Límite API | Chat IA | Para |
+|------|--------|-----------|---------|------|
+| **GRATIS** | $0/mes | 30 req/min, 150/día | 5 req/min | Developers probando |
+| **AGENTE** | $30K COP/mes | 100 req/min, 1,000/día | 20 req/min | Inmobiliarias |
+| **CONJUNTO** | $150K COP/mes | 300 req/min, 5,000/día | 50 req/min | Administradores |
+| **EMPRESARIAL** | Cotizar | Personalizado | Personalizado | Bancos, fintechs |
 
 ## 🔗 Links
 
@@ -132,7 +145,7 @@ Pequi's API is available natively inside every major AI assistant and coding age
 | **OpenClaw** | Gateway Plugin | JavaScript plugin in `packages/openclaw-plugin/pequi-gateway.js` |
 | **Hermes** | Skill | Skill file on droplet — overnight autonomous planning |
 
-All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
+All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min general, 5 req/min chat). Chat has lower limits to protect AI costs.
 
 ## 🧠 Model Providers
 
