@@ -175,6 +175,30 @@ properties = client.properties.search(city="ibague", limit=5)
 print(properties)
 ```
 
+## 🤖 Agent-Friendly Features
+
+All API errors now return a standardized envelope that AI agents can parse deterministically:
+
+```json
+{
+  "error": "Demasiadas solicitudes.",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "recoverable": true,
+  "suggestedAction": "El limite se restablecera automaticamente. Reintenta despues del tiempo indicado en Retry-After.",
+  "retryAfter": 30,
+  "requestId": "req_a1b_2c3"
+}
+```
+
+Error codes: `INVALID_API_KEY`, `RATE_LIMIT_EXCEEDED`, `QUOTA_EXCEEDED`, `BAD_REQUEST`,
+`VALIDATION_ERROR`, `INTERNAL_ERROR`, `SERVICE_UNAVAILABLE`, `NOT_FOUND`, `INSUFFICIENT_SCOPE`.
+
+**Agent tip:** Use `recoverable` to decide whether to retry. Use `retryAfter` for backoff.
+
+See [AI Agents Guide](https://xpequi.xyz/developers/agents) for tool selection, MCP setup, and best practices.
+
+---
+
 ## 📄 Licencia
 
 MIT © Pequi
