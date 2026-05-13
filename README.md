@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>Colombia's First Real Estate Data API</strong><br />
-  <em>API pública de datos inmobiliarios para Ibagué y Colombia</em><br />
+  <em>API pública de datos inmobiliarios — Ibagué (64 barrios) + Bogotá (102 barrios) 🅱️ BETA</em><br />
   Basado en Open Finance · <a href="https://xpequi.xyz/blog/open-finance-decreto-0368">Decreto 0368</a>
 </p>
 
