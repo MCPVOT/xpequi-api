@@ -155,6 +155,36 @@ export interface UploadResult {
   size: number
 }
 
+export interface LatencyPoint {
+  hour: string
+  value: number
+  samples: number
+}
+
+export interface ErrorBreakdown {
+  route: string
+  '4xx': number
+  '5xx': number
+  total: number
+}
+
+export interface UptimeData {
+  successRate: number
+  total: number
+  errors: number
+  window: string
+}
+
+export interface WebhookEndpoint {
+  id: string
+  url: string
+  events: string[]
+  isActive: boolean
+  lastDelivery: string | null
+  lastStatus: number | null
+  createdAt: string
+}
+
 // ─── Client ───────────────────────────────────────────────────────
 
 export class PequiClient {
@@ -303,6 +333,46 @@ export class PequiClient {
     const formData = new FormData()
     formData.append('file', file, fileName)
     return this.postForm<any>('/upload', formData)
+  }
+
+  // ── Monitoring ──────────────────────────────────────────────────
+
+  async getLatency(quantile: string = 'p95'): Promise<LatencyPoint[]> {
+    const data = await this.get<any>('/monitoring/latency', { quantile })
+    return data.data || data
+  }
+
+  async getErrors(): Promise<ErrorBreakdown[]> {
+    const data = await this.get<any>('/monitoring/errors')
+    return data.data || data
+  }
+
+  async getUptime(window: string = '24h'): Promise<UptimeData> {
+    const data = await this.get<any>('/monitoring/uptime', { window })
+    return data.data || data
+  }
+
+  // ── Webhooks ────────────────────────────────────────────────────
+
+  async listWebhooks(): Promise<WebhookEndpoint[]> {
+    const data = await this.get<any>('/webhooks/endpoints')
+    return data.data || data
+  }
+
+  async createWebhook(url: string, events: string[]): Promise<WebhookEndpoint & { secret: string }> {
+    return this.post<any>('/webhooks/endpoints', { url, events })
+  }
+
+  async deleteWebhook(id: string): Promise<void> {
+    await fetch(`${this.baseUrl}/webhooks/endpoints/${id}`, {
+      method: 'DELETE',
+      headers: this.apiKey ? { 'Authorization': `Bearer ${this.apiKey}` } : {},
+    })
+  }
+
+  async testWebhook(id: string): Promise<{ success: boolean; statusCode?: number; error?: string }> {
+    const data = await this.post<any>(`/webhooks/endpoints/${id}/test`, {})
+    return data.data || data
   }
 }
 
