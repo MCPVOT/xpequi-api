@@ -1,0 +1,58 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Pequi API — Colombian Real Estate",
+    "description": "Search properties, get neighborhood data, price benchmarks, and geocode addresses in Colombia.",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://xpequi.xyz/api/v1" }],
+  "paths": {
+    "/properties": {
+      "get": {
+        "operationId": "searchProperties",
+        "summary": "Search properties in Colombia",
+        "parameters": [
+          { "name": "city", "in": "query", "schema": { "type": "string", "default": "ibague" } },
+          { "name": "tipo", "in": "query", "schema": { "type": "string", "enum": ["apartamento", "casa", "local", "lote"] } },
+          { "name": "operacion", "in": "query", "schema": { "type": "string", "enum": ["venta", "arriendo"] } },
+          { "name": "precio_min", "in": "query", "schema": { "type": "number" } },
+          { "name": "precio_max", "in": "query", "schema": { "type": "number" } },
+          { "name": "cuartos", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": { "200": { "description": "Properties matching the search criteria" } }
+      }
+    },
+    "/barrios": {
+      "get": {
+        "operationId": "getBarrios",
+        "summary": "List neighborhoods in a city",
+        "parameters": [
+          { "name": "city", "in": "query", "schema": { "type": "string", "default": "ibague" } }
+        ],
+        "responses": { "200": { "description": "List of neighborhoods with estratos" } }
+      }
+    },
+    "/benchmarks": {
+      "get": {
+        "operationId": "getBenchmarks",
+        "summary": "Get price per m² benchmarks",
+        "parameters": [
+          { "name": "barrio", "in": "query", "schema": { "type": "string" } },
+          { "name": "tipo", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Price benchmarks by area" } }
+      }
+    },
+    "/geocode": {
+      "get": {
+        "operationId": "geocode",
+        "summary": "Convert address to coordinates",
+        "parameters": [
+          { "name": "address", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Geocoded coordinates" } }
+      }
+    }
+  }
+}

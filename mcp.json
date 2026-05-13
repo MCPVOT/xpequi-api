@@ -1,0 +1,23 @@
+{
+  "name": "Pequi API",
+  "description": "Colombian real estate data API — search properties, neighborhoods, benchmarks, and geocode.",
+  "url": "https://xpequi.xyz",
+  "npm": "@MCPVOT/mcp-server",
+  "author": "MCPVOT",
+  "categories": ["real-estate", "colombia", "property", "data"],
+  "license": "MIT",
+  "tags": ["colombia", "real-estate", "ibague", "propiedades", "mcp-server"],
+  "repository": "https://github.com/MCPVOT/xpequi-api",
+  "homepage": "https://xpequi.xyz/developers",
+  "install": "npx -y @MCPVOT/mcp-server",
+  "claude": {
+    "macOS": "Add to claude_desktop_config.json → mcpServers.pequi-api.command = npx, args = [-y, @MCPVOT/mcp-server]",
+    "windows": "Same config in %APPDATA%/Claude/claude_desktop_config.json"
+  },
+  "directories": ["mcp.so", "smithery.ai", "mintlify"],
+  "features": {
+    "tools": 4,
+    "resources": 2,
+    "auth": "Bearer token (optional for FREE tier)"
+  }
+}

@@ -114,19 +114,39 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 
 ## 🤖 Supported AI Agents
 
-Pequi's API is available natively inside every major AI coding agent.
+Pequi's API is available natively inside every major AI assistant and coding agent.
 
 | Agent | How to Connect | Install |
 |-------|---------------|---------|
 | **Claude Desktop** | MCP Server | `npx -y @MCPVOT/mcp-server` |
-| **Claude Code** | MCP config | Add to `claude_desktop_config.json` ([docs](docs/claude-code-integration.md)) |
+| **Claude Code** | MCP config | Add `claude_desktop_config.json` ([docs](docs/claude-code-integration.md)) |
 | **Cursor** | MCP Server | `npx -y @MCPVOT/mcp-server` |
 | **VS Code Copilot** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **OpenAI ChatGPT** | Custom GPT Action | Import `docs/api/custom-gpt/gpt-action.json` into GPT config |
+| **Perplexity** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **Z.AI (GLM-5.1)** | MCP Server | `npx -y robertcprice/glm-mcp-server` |
+| **Qwen (3.6 Plus)** | MCP Server | `npx -y @iflow-mcp/gy920-qwen-mcp-tool` |
+| **OpenRouter** | MCP Server | `npx -y @stabgan/openrouter-mcp-multimodal` |
 | **OpenCode** | Plugin | `opencode plugin install @MCPVOT/opencode-pequi-plugin` |
 | **Ollama** | Custom Tool | Python function in `packages/ollama-tool/pequi_tool.py` |
 | **OpenClaw** | Gateway Plugin | JavaScript plugin in `packages/openclaw-plugin/pequi-gateway.js` |
+| **Hermes** | Skill | Skill file on droplet — overnight autonomous planning |
 
 All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
+
+## 🧠 Model Providers
+
+Pequi's API platform works across **5 model ecosystems**, each with unique strengths:
+
+| Provider | Models | MCP | Best For |
+|----------|--------|-----|----------|
+| **DeepSeek** | V4 Flash | Built-in | Default AI agent, Colombian law expertise |
+| **Z.AI** | GLM-5.1 | `npx -y robertcprice/glm-mcp-server` | #1 on SWE-Bench Pro, reduces Claude Code costs up to 87% |
+| **Qwen** | 3.6 Plus | `npx -y @iflow-mcp/gy920-qwen-mcp-tool` | 1M context window, 128K output tokens — largest free context |
+| **Groq** | Llama 4 Scout | Built-in | High-speed inference fallback |
+| **OpenRouter** | 300+ models | `npx -y @stabgan/openrouter-mcp-multimodal` | Access any model through single MCP server |
+
+Pequi is also registered on **MCP directories**: [mcp.so](https://mcp.so), [smithery.ai](https://smithery.ai), and [mintlify](https://mintlify.com).
 
 ## 🐍 Python SDK
 
