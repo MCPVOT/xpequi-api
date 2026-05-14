@@ -248,7 +248,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
   } catch (err) {
     const message = err instanceof z.ZodError
-      ? `Invalid arguments: ${err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join('; ')}`
+      ? `Invalid arguments: ${err.issues.map(e => `${e.path.join('.')}: ${e.message}`).join('; ')}`
       : err instanceof Error ? err.message : 'Unknown error'
     return {
       content: [{ type: 'text', text: `Error: ${message}` }],
@@ -368,18 +368,41 @@ async function main() {
   if (useStdio) {
     const transport = new StdioServerTransport()
     await server.connect(transport)
+    console.error(`[${SERVER_NAME}] Connected via stdio`)
   } else {
-    const transport = new SSEServerTransport('/mcp', new http.ServerResponse({} as any))
-    // SSE transport handled via HTTP server
+    // SSE mode: proper transport per connection
+    let sseTransport: SSEServerTransport | null = null
+
     const httpServer = http.createServer(async (req, res) => {
-      if (req.method === 'GET' && req.url === '/health') {
+      const url = req.url || ''
+
+      // POST to /mcp — forward JSON-RPC message to existing SSE connection
+      if (req.method === 'POST' && url === '/mcp' && sseTransport) {
+        const chunks: Buffer[] = []
+        for await (const chunk of req) chunks.push(chunk)
+        const body = Buffer.concat(chunks).toString()
+        sseTransport.handlePostMessage(req, res, body)
+        return
+      }
+
+      // GET /mcp — establish new SSE connection
+      if (req.method === 'GET' && url === '/mcp') {
+        sseTransport = new SSEServerTransport('/mcp', res)
+        await server.connect(sseTransport)
+        return
+      }
+
+      // GET /health — simple health check
+      if (req.method === 'GET' && url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ status: 'ok', server: SERVER_NAME, version: SERVER_VERSION }))
         return
       }
+
       res.writeHead(404)
       res.end('Not found')
     })
+
     httpServer.listen(PORT, '127.0.0.1', () => {
       console.error(`[${SERVER_NAME}] SSE server listening on http://localhost:${PORT}/mcp`)
       console.error(`[${SERVER_NAME}] Health: http://localhost:${PORT}/health`)
