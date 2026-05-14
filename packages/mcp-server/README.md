@@ -2,9 +2,28 @@
 
 > MCP server for Pequi — Colombia's first real estate data API.
 
-Search properties, lookup neighborhoods, get price benchmarks, and geocode addresses in **Ibagué** (64 barrios) and **Bogotá** (212 barrios, 20 localidades) — all through the [Model Context Protocol](https://modelcontextprotocol.io).
+Search properties, lookup neighborhoods, get price benchmarks, geocode addresses, fetch live UVR/IPC financial indicators, and calculate legal rent increases — all in **Ibagué** (64 barrios) and **Bogotá** (212 barrios, 20 localidades) — through the [Model Context Protocol](https://modelcontextprotocol.io).
 
-## Quick Start
+## Tools
+
+| Tool | Description | Cost |
+|------|-------------|------|
+| `search_properties` | Search properties by type, price, location, bedrooms | ✅ FREE |
+| `get_barrios` | List all neighborhoods with estrato, GIS data | ✅ FREE |
+| `get_benchmarks` | Price per m² benchmarks by neighborhood | ✅ FREE |
+| `geocode` | Convert address to GPS coordinates | ✅ FREE |
+| `get_uvr` | Current UVR value (daily, from Banco de la República) | ✅ FREE |
+| `get_ipc` | Current IPC inflation rate (trailing 12-month) | ✅ FREE |
+| `calculate_rent_increase` | Max legal rent increase under Ley 820/2003 | ✅ FREE |
+
+## Resources
+
+| URI | Description |
+|-----|-------------|
+| `pequi://ibague` | Complete Ibagué metadata (64 barrios) |
+| `pequi://bogota` | Complete Bogotá metadata (212 barrios) |
+| `pequi://open-finance` | Open Finance Decreto 0368 summary |
+| `pequi://colombia-finance` | Live UVR + IPC financial indicators |
 
 ### Claude Desktop
 

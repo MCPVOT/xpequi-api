@@ -96,6 +96,15 @@ const GeocodeSchema = z.object({
   address: z.string().describe('Address to geocode (e.g., "Calle 10 #3-15, Ibagué")'),
 })
 
+const GetUvrSchema = z.object({})
+
+const GetIpcSchema = z.object({})
+
+const CalculateRentIncreaseSchema = z.object({
+  currentRent: z.coerce.number().positive().describe('Current monthly rent amount in COP'),
+  ipc: z.coerce.number().optional().describe('IPC variation rate (defaults to current IPC if not provided)'),
+})
+
 // ─── Tool Definitions ─────────────────────────────────────────────
 
 const TOOLS = [
@@ -151,6 +160,34 @@ const TOOLS = [
         address: { type: 'string', description: 'Address to geocode (e.g., "Calle 10 #3-15, Ibagué" or "Carrera 7 #72-40, Bogotá")' },
       },
       required: ['address'],
+    },
+  },
+  {
+    name: 'get_uvr',
+    description: `Get the current UVR (Unidad de Valor Real) value from the Banco de la República (Colombia's central bank). UVR is a daily inflation-adjusted unit used for legal rent adjustments under Ley 820/2003, mortgage calculations, and financial indexation. Returns the current value, date, and data source.`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_ipc',
+    description: `Get the current trailing 12-month IPC (Índice de Precios al Consumidor) inflation rate from the Banco de la República. IPC is the official Colombian inflation measure used to calculate maximum legal rent increases under Ley 820/2003. Returns the annual variation percentage, reference month, and data source.`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'calculate_rent_increase',
+    description: `Calculate the maximum legal rent increase in Colombia under Ley 820/2003. Uses the current IPC inflation rate (or a provided rate) to compute the adjusted rent amount. Essential for landlords and tenants during annual contract renewal. Input: current monthly rent in COP, optional IPC rate. Output: adjusted rent, increase amount, increase percentage, and the legal formula reference.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        currentRent: { type: 'number', description: 'Current monthly rent amount in COP (e.g., 1500000)' },
+        ipc: { type: 'number', description: 'Optional IPC variation rate to use (e.g., 5.82). Defaults to current IPC from BanRep if not provided.' },
+      },
+      required: ['currentRent'],
     },
   },
 ]
@@ -234,6 +271,58 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
       }
 
+      case 'get_uvr': {
+        const data = await apiGet('/uvr')
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(data, null, 2),
+          }],
+        }
+      }
+
+      case 'get_ipc': {
+        const data = await apiGet('/ipc')
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(data, null, 2),
+          }],
+        }
+      }
+
+      case 'calculate_rent_increase': {
+        const params = CalculateRentIncreaseSchema.parse(args || {})
+        const data = await apiGet('/rent-increase', {
+          currentRent: params.currentRent.toString(),
+          ipc: params.ipc?.toString(),
+        })
+        // POST the data since it needs a body
+        const url = new URL(`${API_BASE}/rent-increase`)
+        const headers: Record<string, string> = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': `${SERVER_NAME}/${SERVER_VERSION}`,
+        }
+        if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
+        const res = await fetch(url.toString(), {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ currentRent: params.currentRent, ipc: params.ipc }),
+        })
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          throw new Error(`API ${res.status}: ${text.slice(0, 200)}`)
+        }
+        const result = await res.json()
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          }],
+        }
+      }
+
       default:
         throw new Error(`Unknown tool: ${name}`)
     }
@@ -268,6 +357,12 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       name: 'Open Finance Decreto 0368',
       description: 'Summary of Colombia\'s Open Finance decree and how Pequi is building the first real estate data API.',
       mimeType: 'text/markdown',
+    },
+    {
+      uri: 'pequi://colombia-finance',
+      name: 'Colombia Financial Indicators',
+      description: 'Current UVR (daily) and IPC (trailing 12-month) values from the Banco de la República, used for Ley 820 rent adjustments.',
+      mimeType: 'application/json',
     },
   ],
 }))
@@ -307,13 +402,14 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
           '',
           '## Implicaciones para Pequi',
           '',
-          'Pequi está construyendo la **primera API de datos inmobiliarios de Colombia**, empezando por Ibagué. Esto significa:',
+          'Pequi está construyendo la **primera API de datos inmobiliarios de Colombia**, empezando por Ibagué y Bogotá. Esto significa:',
           '',
-          '- Propiedades con filtros por tipo, precio, barrio, estrato, coordenadas',
-          '- 85 barrios de Ibagué mapeados con estrato y GIS',
+          '- Propiedades con filtros por tipo, precio, barrio, estrato, coordenadas GIS',
+          '- 64 barrios de Ibagué + 212 barrios de Bogotá mapeados con estrato',
           '- Precios de referencia por m² (benchmarks de mercado)',
           '- Contratos Ley 820 con firma digital',
           '- Pagos seguros via Wompi',
+          '- Indicadores financieros: UVR e IPC del Banco de la República',
           '',
           '## Modelo de Negocio',
           '',
@@ -328,13 +424,33 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
           '',
           '- Web: https://xpequi.xyz',
           '- Blog: https://xpequi.xyz/blog/open-finance-decreto-0368',
-          '- API Docs: pronto en /developers',
+          '- API Docs: https://xpequi.xyz/developers/api-ref',
         ].join('\n')
         return {
           contents: [{
             uri,
             mimeType: 'text/markdown',
             text: md,
+          }],
+        }
+      }
+
+      case 'pequi://colombia-finance': {
+        const [uvrRes, ipcRes] = await Promise.all([
+          apiGet<{ data: { value: number; date: string; source: string } }>('/uvr').catch(() => ({ data: { value: 428.53, date: '2026-05-14', source: 'api-unavailable' } })),
+          apiGet<{ data: { annualVariation: number; month: string; source: string } }>('/ipc').catch(() => ({ data: { annualVariation: 5.82, month: '2026-05', source: 'api-unavailable' } })),
+        ])
+        const result = {
+          uvr: uvrRes.data,
+          ipc: ipcRes.data,
+          legalBasis: 'Ley 820 de 2003 — Artículo 20',
+          note: 'UVR is used for financial indexation. IPC is the trailing 12-month inflation rate used for rent adjustments.',
+        }
+        return {
+          contents: [{
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(result, null, 2),
           }],
         }
       }
