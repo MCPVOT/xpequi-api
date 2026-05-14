@@ -2,7 +2,7 @@
 
 > MCP server for Pequi — Colombia's first real estate data API.
 
-Search properties, lookup neighborhoods, get price benchmarks, and geocode addresses in Ibagué, Tolima — all through the [Model Context Protocol](https://modelcontextprotocol.io).
+Search properties, lookup neighborhoods, get price benchmarks, and geocode addresses in **Ibagué** (64 barrios) and **Bogotá** (212 barrios, 20 localidades) — all through the [Model Context Protocol](https://modelcontextprotocol.io).
 
 ## Quick Start
 
@@ -48,16 +48,17 @@ In Cursor Settings → MCP Servers → Add:
 
 | Tool | Description | Inputs |
 |------|-------------|--------|
-| `search_properties` | Search properties in Ibagué | city, tipo, barrio, estrato, min_price, max_price, cuartos, banos, operacion, limit, page |
-| `get_barrios` | Get all neighborhoods with estrato and GIS data | city |
-| `get_benchmarks` | Price benchmarks per m² | barrio, tipo, estrato |
+| `search_properties` | Search properties in Colombian cities (Ibagué, Bogotá, expanding) | city, tipo, barrio, estrato, min_price, max_price, cuartos, banos, operacion, limit, page |
+| `get_barrios` | Get all neighborhoods with estrato and GIS data | city (ibague, bogota) |
+| `get_benchmarks` | Price benchmarks per m² by city and neighborhood | city, barrio, tipo, estrato |
 | `geocode` | Convert address to coordinates | address (required) |
 
 ## Resources
 
 | URI | Description |
 |-----|------------|
-| `pequi://ibague` | Full Ibagué metadata (neighborhoods, estratos, coordinates) |
+| `pequi://ibague` | Full Ibagué metadata — 64 neighborhoods with estratos, GIS coordinates |
+| `pequi://bogota` | Full Bogotá metadata — 212 neighborhoods across 20 localidades |
 | `pequi://open-finance` | Decreto 0368 summary + Pequi API platform info |
 
 ## Advanced Usage
@@ -91,7 +92,7 @@ This MCP server only accesses **aggregate, anonymized data** through the Pequi A
 ## Links
 
 - **Website:** https://xpequi.xyz
-- **API Docs:** https://xpequi.xyz/developers (coming soon)
+- **API Docs:** https://xpequi.xyz/developers
 - **Blog:** https://xpequi.xyz/blog/open-finance-decreto-0368
 - **GitHub:** https://github.com/MCPVOT/pequi/tree/master/packages/mcp-server
 - **npm:** `@MCPVOT/mcp-server`
