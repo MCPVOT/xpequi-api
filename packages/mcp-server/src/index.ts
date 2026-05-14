@@ -98,30 +98,39 @@ const GeocodeSchema = z.object({
 
 // ─── Tool Definitions ─────────────────────────────────────────────
 
-const TOOLS = [
+const TOOLS: Array<{
+  name: string
+  description: string
+  inputSchema: {
+    type: string
+    properties: Record<string, unknown>
+    required?: string[]
+  }
+}> = [
   {
     name: 'search_properties',
-    description: `Search for properties in Colombian cities (Ibagué, Bogotá, and expanding). Filter by type, neighborhood, price range, bedrooms, bathrooms, stratum, and transaction type. Returns paginated results with full property details including location, price, features, and GIS coordinates.`,
+    description:
+      'Search real estate listings in Colombian cities. Supports ibague, bogota, cali, medellin, barranquilla. Filter by property type (apartamento/casa/local/oficina/lote/finca/habitacion), neighborhood, price range, bedrooms, bathrooms, stratum (1-6), and operation type. Returns paginated results with full details including location, price, features, and GIS coordinates.',
     inputSchema: {
       type: 'object',
       properties: {
         city: { type: 'string', description: 'City slug: ibague, bogota, cali, medellin, barranquilla (default: ibague)' },
-        tipo: { type: 'string', enum: ['apartamento', 'casa', 'local', 'oficina', 'lote', 'finca', 'habitacion'], description: 'Property type' },
-        barrio: { type: 'string', description: 'Neighborhood name' },
-        estrato: { type: 'number', description: 'Estrato (1-6)', minimum: 1, maximum: 6 },
+        tipo: { type: 'string', enum: ['apartamento', 'casa', 'local', 'oficina', 'lote', 'finca', 'habitacion'], description: 'Property type filter' },
+        barrio: { type: 'string', description: 'Neighborhood name (e.g. "centro", "picaleña", "la-islita")' },
+        estrato: { type: 'number', description: 'Socioeconomic stratum 1-6', minimum: 1, maximum: 6 },
         min_price: { type: 'number', description: 'Minimum monthly price in COP' },
         max_price: { type: 'number', description: 'Maximum monthly price in COP' },
-        cuartos: { type: 'number', description: 'Minimum bedrooms' },
-        banos: { type: 'number', description: 'Minimum bathrooms' },
-        operacion: { type: 'string', enum: ['venta', 'arriendo'], description: 'Sale or rent' },
+        cuartos: { type: 'number', description: 'Minimum number of bedrooms' },
+        banos: { type: 'number', description: 'Minimum number of bathrooms' },
+        operacion: { type: 'string', enum: ['venta', 'arriendo'], description: 'Transaction type: "venta" (sale) or "arriendo" (rent)' },
         limit: { type: 'number', description: 'Results per page (1-100)', default: 20 },
-        page: { type: 'number', description: 'Page number', default: 1 },
+        page: { type: 'number', description: 'Page number for pagination', default: 1 },
       },
     },
   },
   {
     name: 'get_barrios',
-    description: `Get all neighborhoods in a Colombian city with their socioeconomic stratum (estrato), GIS coordinates, and general data. Supports Ibagué (64 barrios), Bogotá (212 barrios), and expanding.`,
+    description: `Get all neighborhoods in a Colombian city with socioeconomic stratum (estrato), GIS coordinates (lat/lng), location descriptions, and demographic data. Supports Ibagué (64 barrios) and Bogotá (212 barrios across 20 localities). Essential for market analysis and property filtering.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -131,29 +140,29 @@ const TOOLS = [
   },
   {
     name: 'get_benchmarks',
-    description: `Get real estate price benchmarks for Colombian cities. Returns average, min, and max prices per square meter broken down by neighborhood, property type, and stratum. Essential for market analysis, investment decisions, and rental comparisons. Supports Ibagué and Bogotá.`,
+    description: `Get real estate price benchmarks (average, min, max price per m²) broken down by neighborhood, property type, and stratum. Ideal for investment analysis, rental comparisons, and market research. Supports Ibagué and Bogotá.`,
     inputSchema: {
       type: 'object',
       properties: {
         city: { type: 'string', description: 'City slug: ibague, bogota (default: ibague)' },
-        barrio: { type: 'string', description: 'Filter by neighborhood' },
+        barrio: { type: 'string', description: 'Filter by specific neighborhood name' },
         tipo: { type: 'string', enum: ['apartamento', 'casa', 'local'], description: 'Filter by property type' },
-        estrato: { type: 'number', description: 'Filter by estrato (1-6)', minimum: 1, maximum: 6 },
+        estrato: { type: 'number', description: 'Filter by socioeconomic stratum (1-6)', minimum: 1, maximum: 6 },
       },
     },
   },
   {
     name: 'geocode',
-    description: `Convert a human-readable address in Colombia to GIS coordinates (latitude, longitude). Useful for mapping properties and understanding locations.`,
+    description: `Convert any human-readable Colombian address into precise GIS coordinates (latitude, longitude). Covers all municipalities — returns full address breakdown including barrio, comuna, and department. Essential for mapping properties or proximity analysis.`,
     inputSchema: {
       type: 'object',
       properties: {
-        address: { type: 'string', description: 'Address to geocode (e.g., "Calle 10 #3-15, Ibagué" or "Carrera 7 #72-40, Bogotá")' },
+        address: { type: 'string', description: 'Address to geocode (e.g. "Calle 10 #3-15, Ibagué" or "Carrera 7 #72-40, Bogotá")' },
       },
       required: ['address'],
     },
   },
-]
+]`
 
 // ─── MCP Server ───────────────────────────────────────────────────
 

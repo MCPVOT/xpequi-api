@@ -1,0 +1,41 @@
+{
+  "serverInfo": {
+    "name": "Pequi API",
+    "version": "0.1.0",
+    "description": "Colombia's first real estate data API — properties, neighborhoods, price benchmarks, geocoding, contracts, and payments"
+  },
+  "authentication": {
+    "required": false
+  },
+  "tools": [
+    {
+      "name": "search_properties",
+      "description": "Search real estate listings in Colombian cities with filters for type, neighborhood, price, bedrooms, bathrooms, stratum, and operation"
+    },
+    {
+      "name": "get_barrios",
+      "description": "Get all neighborhoods with GIS coordinates and socioeconomic data for Ibagué (64) and Bogotá (212)"
+    },
+    {
+      "name": "get_benchmarks",
+      "description": "Get price benchmarks per m² broken down by neighborhood, property type, and stratum"
+    },
+    {
+      "name": "geocode",
+      "description": "Convert Colombian addresses to GIS coordinates"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "pequi://ibague",
+      "name": "Ibagué Neighborhood Data",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "pequi://bogota",
+      "name": "Bogotá Neighborhood Data",
+      "mimeType": "application/json"
+    }
+  ],
+  "prompts": []
+}

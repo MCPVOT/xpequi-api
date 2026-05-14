@@ -15,10 +15,13 @@
 <p align="center">
   <a href="https://xpequi.xyz"><img src="https://img.shields.io/badge/xpequi.xyz-00e5ff?style=flat-square&logo=vercel&logoColor=white" alt="Website" /></a>
   <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fapi--client-blue?style=flat-square&logo=npm&logoColor=white" alt="npm" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fmcp--server-purple?style=flat-square&logo=npm&logoColor=white" alt="npm MCP" /></a>
+  <a href="https://www.npmjs.com/package/@MCPVOT/api-client"><img src="https://img.shields.io/npm/dw/@MCPVOT/api-client?style=flat-square&color=orange" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/MCP-directory-blue?style=flat-square&logo=modelcontextprotocol" alt="MCP Directory" />
+  <a href="https://smithery.ai"><img src="https://img.shields.io/badge/Smithery-Pequi%20API-orange?style=flat-square" alt="Smithery" /></a>
   <img src="https://img.shields.io/badge/Open%20Finance-Decreto%200368-ff8c00?style=flat-square" alt="Open Finance" />
 </p>
-
 ---
 
 ## 📦 Paquetes
