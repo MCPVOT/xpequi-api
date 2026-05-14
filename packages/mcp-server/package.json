@@ -25,10 +25,19 @@
     "model-context-protocol",
     "colombia",
     "real-estate",
+    "real-estate-api",
     "ibague",
+    "bogota",
     "propiedades",
     "inmobiliario",
-    "pequi"
+    "pequi",
+    "llama",
+    "open-source",
+    "open-finance",
+    "ai-agents",
+    "claude",
+    "cursor",
+    "chatgpt"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.0",
@@ -44,7 +53,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MCPVOT/pequi.git",
+    "url": "https://github.com/MCPVOT/xpequi-api.git",
     "directory": "packages/mcp-server"
   }
 }

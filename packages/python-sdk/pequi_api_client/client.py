@@ -193,15 +193,28 @@ class _UploadAPI:
         import os
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"File not found: {filepath}")
+        import io
+        import urllib.request
+        filename = os.path.basename(filepath)
+        boundary = "----PequiFormBoundary" + os.urandom(16).hex()
+        body = io.BytesIO()
+        body.write(f"--{boundary}\r\n".encode())
+        body.write(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode())
+        body.write(b"Content-Type: application/octet-stream\r\n\r\n")
         with open(filepath, "rb") as f:
-            import requests
-            url = f"{self._client._base_url}/upload"
-            headers = {"Accept": "application/json"}
-            if self._client._api_key:
-                headers["Authorization"] = f"Bearer {self._client._api_key}"
-            resp = requests.post(url, files={"file": f}, headers=headers, timeout=60)
-            resp.raise_for_status()
-            return resp.json().get("data", resp.json())
+            body.write(f.read())
+        body.write(f"\r\n--{boundary}--\r\n".encode())
+        data = body.getvalue()
+        url = f"{self._client._base_url}/upload"
+        req = urllib.request.Request(url, data=data)
+        req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
+        req.add_header("Accept", "application/json")
+        if self._client._api_key:
+            req.add_header("Authorization", f"Bearer {self._client._api_key}")
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            import json
+            result = json.loads(resp.read().decode())
+            return result.get("data", result)
 
 
 class PequiClient:

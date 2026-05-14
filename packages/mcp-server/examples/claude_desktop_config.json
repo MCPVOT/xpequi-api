@@ -2,7 +2,7 @@
   "mcpServers": {
     "pequi": {
       "command": "npx",
-      "args": ["-y", "@pequi/mcp-server"],
+      "args": ["-y", "@MCPVOT/mcp-server"],
       "env": {
         "PEQUI_API_KEY": ""
       }
