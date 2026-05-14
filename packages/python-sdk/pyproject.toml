@@ -15,21 +15,24 @@ dependencies = [
     "python-dateutil>=2.8.0",
     "certifi>=2024.0.0",
 ]
-keywords = ["colombia", "real-estate", "ibague", "propiedades", "inmobiliario", "pequi"]
+keywords = ["colombia", "real-estate", "real-estate-api", "ibague", "bogota", "propiedades", "inmobiliario", "pequi", "open-source", "llama", "open-finance"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 [project.urls]
 Homepage = "https://xpequi.xyz/developers"
-Repository = "https://github.com/MCPVOT/pequi"
+Repository = "https://github.com/MCPVOT/xpequi-api"
 Documentation = "https://xpequi.xyz/developers/api-ref"
 
 [tool.setuptools.packages.find]

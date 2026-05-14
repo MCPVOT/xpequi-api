@@ -2,7 +2,8 @@
   "name": "xpequi-api",
   "version": "0.1.0",
   "private": true,
-  "description": "Pequi API — Colombia's first real estate data API",
+  "description": "Colombia's first real estate data API — search properties, neighborhoods, price benchmarks, geocoding, contracts, payments, and MCP server for AI agents",
+  "keywords": ["colombia", "real-estate", "ibague", "bogota", "propiedades", "inmobiliario", "api", "mcp", "real-estate-api", "colombia-real-estate", "open-finance", "llama", "open-source"],
   "workspaces": [
     "packages/api-client",
     "packages/mcp-server"
