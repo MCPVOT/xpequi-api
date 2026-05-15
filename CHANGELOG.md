@@ -4,6 +4,18 @@ All notable changes to the Pequi API platform will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] — 2026-05-15
+
+### Added
+- c402 Protocol branding — HTTP 402 Payment Required for exceeded FREE-tier limits
+- Prepaid credit packs (50/200/1000 calls via Wompi) with automatic fallback
+- `c402` badge, tags, and documentation in README and MCP manifest
+- README section explaining c402 protocol for AI agents
+
+### Changed
+- `mcp.json`: tools count updated to 7, tags include `c402`, `uvr`, `ipc`, `open-finance`
+- `package.json`: keywords include `c402`, `http-402`, `prepaid-credits`, `uvr`, `ipc`
+
 ## [0.2.0] — 2026-05-12
 
 ### Added

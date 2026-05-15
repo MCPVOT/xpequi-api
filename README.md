@@ -21,6 +21,7 @@
   <img src="https://img.shields.io/badge/MCP-directory-blue?style=flat-square&logo=modelcontextprotocol" alt="MCP Directory" />
   <a href="https://smithery.ai"><img src="https://img.shields.io/badge/Smithery-Pequi%20API-orange?style=flat-square" alt="Smithery" /></a>
   <img src="https://img.shields.io/badge/Open%20Finance-Decreto%200368-ff8c00?style=flat-square" alt="Open Finance" />
+  <img src="https://img.shields.io/badge/c402-HTTP%20402%20Payment-00ff88?style=flat-square&logo=wompi&logoColor=white" alt="c402 Protocol" />
 </p>
 ---
 
@@ -118,9 +119,32 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 | Tier | Precio | Límite API | Chat IA | Para |
 |------|--------|-----------|---------|------|
 | **GRATIS** | $0/mes | 30 req/min, 150/día | 5 req/min | Developers probando |
+| **PREPAGO** (c402) | Pay-as-you-go | 50/200/1000 calls vía Wompi | — | Usuarios ocasionales que superan el límite gratis |
 | **AGENTE** | $30K COP/mes | 100 req/min, 1,000/día | 20 req/min | Inmobiliarias |
 | **CONJUNTO** | $150K COP/mes | 300 req/min, 5,000/día | 50 req/min | Administradores |
 | **EMPRESARIAL** | Cotizar | Personalizado | Personalizado | Bancos, fintechs |
+
+## 💳 c402 Protocol — HTTP 402 Payment Required
+
+Pequi implements the **c402 Protocol** for HTTP 402 Payment Required — a Colombian-first approach to API monetization:
+
+- **Agents:** When a FREE-tier request exceeds the rate limit and has no prepaid credits, the API returns `HTTP 402 Payment Required` with an `X-402-Challenge` header containing a Wompi checkout URL
+- **Prepaid Credits:** Purchase credit packs (50/200/1000 calls) via Wompi Web Checkout (PSE, Nequi, DaviPlata, credit/debit card)
+- **Security:** SHA-256 webhook verification, UUID v4 nonces (single-use via Redis), atomic credit deduction (no race conditions), 24h idempotency guard
+- **Zero crypto:** No blockchain, no wallets, no RSA — only SHA-256 + Redis atomic operations
+- **Data Privacy:** Only public/anonymized data is ever sold. No PII exposure.
+
+```
+GET /api/v1/properties
+Authorization: Bearer pequi_key_abc123
+
+→ HTTP 402 Payment Required
+X-402-Challenge: {"nonce":"...", "amount":2500, "currency":"COP", "paymentUrl":"https://checkout.wompi.co/p/?..."}
+```
+
+**For AI Agents:** The `recoverable: true` error envelope tells agents to present the payment URL to the user. Prepaid credits avoid 402 entirely — just keep a positive balance.
+
+See full spec: [`docs/strategy/c402-MONETIZATION.md`](https://github.com/MCPVOT/pequi/blob/master/docs/strategy/c402-MONETIZATION.md) (private repo)
 
 ## 🔗 Links
 

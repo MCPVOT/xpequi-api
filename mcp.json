@@ -1,12 +1,12 @@
 {
   "name": "Pequi API",
-  "description": "Colombian real estate data API — search properties, neighborhoods, benchmarks, and geocode.",
+  "description": "Colombian real estate data API — search properties, neighborhoods, benchmarks, geocode, UVR/IPC, and rent increase calculations. c402 protocol for HTTP 402 payment challenges.",
   "url": "https://xpequi.xyz",
   "npm": "@MCPVOT/mcp-server",
   "author": "MCPVOT",
-  "categories": ["real-estate", "colombia", "property", "data"],
+  "categories": ["real-estate", "colombia", "property", "data", "fintech", "payments"],
   "license": "MIT",
-  "tags": ["colombia", "real-estate", "ibague", "propiedades", "mcp-server"],
+  "tags": ["colombia", "real-estate", "ibague", "bogota", "propiedades", "mcp-server", "c402", "open-finance", "uvr", "ipc"],
   "repository": "https://github.com/MCPVOT/xpequi-api",
   "homepage": "https://xpequi.xyz/developers",
   "install": "npx -y @MCPVOT/mcp-server",
@@ -16,8 +16,8 @@
   },
   "directories": ["mcp.so", "smithery.ai", "mintlify"],
   "features": {
-    "tools": 4,
+    "tools": 7,
     "resources": 2,
-    "auth": "Bearer token (optional for FREE tier)"
+    "auth": "Bearer token (optional for FREE tier, required for c402 prepaid credits)"
   }
 }
