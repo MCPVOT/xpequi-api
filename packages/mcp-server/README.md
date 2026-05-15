@@ -4,6 +4,8 @@
 
 Search properties, lookup neighborhoods, get price benchmarks, geocode addresses, fetch live UVR/IPC financial indicators, and calculate legal rent increases — all in **Ibagué** (64 barrios) and **Bogotá** (212 barrios, 20 localidades) — through the [Model Context Protocol](https://modelcontextprotocol.io).
 
+Pequi also implements **c402** — the first Colombian protocol for machine-to-machine payments. HTTP 402 + Wompi COP + Redis. Zero crypto. See [c402 protocol](https://xpequi.xyz/blog/c402-pagos-ia-colombia) for details.
+
 ## Tools
 
 | Tool | Description | Cost |
