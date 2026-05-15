@@ -120,8 +120,8 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 |------|--------|-----------|------|
 | **GRATIS** | $0/mes | 30 req/min, 150/día | Developers probando |
 | **PREPAGO** (c402) | Desde $2,500 COP | 50/200/1000 calls vía Wompi | Usuarios ocasionales |
-| **AGENTE API** | $30K COP/mes | 100 req/min, 1,000/día | Integradores y agentes |
-| **CONJUNTO API** | $150K COP/mes | 300 req/min, 5,000/día | Conjuntos y fintechs |
+| **AGENTE API** | $30K COP/mes | 100 req/min, 1,000/día | Integradores y startups |
+| **CONJUNTO API** | $150K COP/mes | 300 req/min, 5,000/día | Empresas y fintechs |
 | **EMPRESARIAL** | Cotizar | Personalizado | Bancos y govtech |
 
 ## 💳 c402 Protocol — HTTP 402 Payment Required
