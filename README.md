@@ -116,13 +116,13 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 
 ## 💰 Precios
 
-| Tier | Precio | Límite API | Chat IA | Para |
-|------|--------|-----------|---------|------|
-| **GRATIS** | $0/mes | 30 req/min, 150/día | 5 req/min | Developers probando |
-| **PREPAGO** (c402) | Pay-as-you-go | 50/200/1000 calls vía Wompi | — | Usuarios ocasionales que superan el límite gratis |
-| **AGENTE** | $30K COP/mes | 100 req/min, 1,000/día | 20 req/min | Inmobiliarias |
-| **CONJUNTO** | $150K COP/mes | 300 req/min, 5,000/día | 50 req/min | Administradores |
-| **EMPRESARIAL** | Cotizar | Personalizado | Personalizado | Bancos, fintechs |
+| Tier | Precio | Límite API | Para |
+|------|--------|-----------|------|
+| **GRATIS** | $0/mes | 30 req/min, 150/día | Developers probando |
+| **PREPAGO** (c402) | Desde $2,500 COP | 50/200/1000 calls vía Wompi | Usuarios ocasionales |
+| **AGENTE API** | $30K COP/mes | 100 req/min, 1,000/día | Integradores y agentes |
+| **CONJUNTO API** | $150K COP/mes | 300 req/min, 5,000/día | Conjuntos y fintechs |
+| **EMPRESARIAL** | Cotizar | Personalizado | Bancos y govtech |
 
 ## 💳 c402 Protocol — HTTP 402 Payment Required
 
