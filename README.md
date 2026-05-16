@@ -27,10 +27,12 @@
 
 ## 📦 Paquetes
 
-| Paquete | Descripción | Instalar |
-|---------|-------------|----------|
-| **`@MCPVOT/api-client`** | TypeScript SDK con tipado completo | `npm install @MCPVOT/api-client` |
-| **`@MCPVOT/mcp-server`** | MCP server para Claude Desktop / Cursor | `npx @MCPVOT/mcp-server` |
+| Paquete | Descripción | Instalar | Estado |
+|---------|-------------|----------|--------|
+| **`@MCPVOT/api-client`** | TypeScript SDK con tipado completo | `npm install @MCPVOT/api-client` | ⏳ Publicación pendiente (GitHub billing) |
+| **`@MCPVOT/mcp-server`** | MCP server para Claude Desktop / Cursor | `npx @MCPVOT/mcp-server` | ⏳ Publicación pendiente (GitHub billing) |
+
+> **Nota:** Los paquetes npm están en GitHub Packages con publicación pendiente por límite de facturación. Mientras tanto, usa los endpoints REST directamente con curl o desde [`xpequi.xyz/developers`](https://xpequi.xyz/developers). La API es completamente funcional sin SDK.
 
 ## 🚀 Uso rápido
 
@@ -94,35 +96,46 @@ curl 'https://xpequi.xyz/api/v1/geocode?address=Calle+10+%233-15+Ibagu%C3%A9'
 
 ## 📋 Endpoints
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `GET` | `/api/v1/properties` | Buscar propiedades (filtros: tipo, precio, barrio, estrato, cuartos) |
-| `GET` | `/api/v1/barrios?city=ibague` | 64 barrios Ibagué |
-| `GET` | `/api/v1/barrios?city=bogota` | 212 barrios Bogotá 🅱️ |
-| `GET` | `/api/v1/benchmarks` | Precios de referencia por m² |
-| `GET` | `/api/v1/geocode` | Dirección → coordenadas |
-| `POST` | `/api/v1/contracts` | Generar contrato Ley 820 |
-| `POST` | `/api/v1/payments` | Crear pago Wompi |
-| `GET` | `/api/v1/payments/{id}` | Estado de pago |
-| `GET` | `/api/v1/complexes` | Listar conjuntos |
-| `GET` | `/api/v1/complexes/{slug}` | Detalle de conjunto |
-| `GET` | `/api/v1/complexes/{slug}/units` | Unidades de conjunto |
-| `POST` | `/api/v1/visits` | Agendar visita |
-| `POST` | `/api/v1/chat` | Chat con IA (DeepSeek + fallbacks) |
-| `POST` | `/api/v1/upload` | Subir archivo (max 5MB) |
-| `GET` | `/api/v1/monitoring/latency` | Latencia P50/P95/P99 |
-| `GET` | `/api/v1/monitoring/errors` | Errores 4xx/5xx por endpoint |
-| `GET` | `/api/v1/monitoring/uptime` | Estadísticas de disponibilidad |
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/properties` | Buscar propiedades (filtros: tipo, precio, barrio, estrato, cuartos) | — |
+| `GET` | `/api/v1/barrios` | 64 barrios Ibagué · 212 barrios Bogotá | — |
+| `GET` | `/api/v1/benchmarks` | Precios de referencia por m² | — |
+| `GET` | `/api/v1/geocode` | Dirección → coordenadas | — |
+| `GET` | `/api/v1/avm` | Valuación automatizada (AVM) con comparables | — |
+| `GET` | `/api/v1/uvr` | UVR actual — Banco de la República | — |
+| `GET` | `/api/v1/ipc` | IPC anual — inflación para ajustes Ley 820 | — |
+| `POST` | `/api/v1/rent-increase` | Calcular incremento legal de arriendo | — |
+| `GET` | `/api/v1/credits` | Saldo de créditos prepago (c402) | — |
+| `GET` | `/api/v1/complexes` | Listar conjuntos residenciales | — |
+| `POST` | `/api/v1/contracts` | Generar contrato Ley 820 | API Key |
+| `POST` | `/api/v1/payments` | Crear pago Wompi | API Key |
+| `POST` | `/api/v1/visits` | Agendar visita | API Key |
+| `POST` | `/api/v1/chat` | Chat con IA inmobiliaria | API Key |
+| `POST` | `/api/v1/upload` | Subir archivos (max 5MB) | API Key |
+| `POST` | `/api/v1/bank-verification` | Verificar cuentas bancarias (Prometeo Open Finance) | API Key |
+| `POST` | `/api/v1/credits/purchase` | Comprar créditos prepago vía Wompi | API Key |
+| `POST` | `/api/v1/subscriptions/api-checkout` | Suscripción API mensual (AGENTE/CONJUNTO) | API Key |
+| `GET` | `/api/v1/monitoring/usage` | Uso actual: llamadas/hora, créditos, tier | API Key |
+| `GET` | `/api/v1/monitoring/latency` | Latencia P50/P95/P99 | API Key |
+| `GET` | `/api/v1/monitoring/errors` | Errores 4xx/5xx por endpoint | API Key |
+| `GET` | `/api/v1/monitoring/uptime` | Disponibilidad de la API | API Key |
+| `POST` | `/api/v1/webhooks/endpoints` | Crear webhooks | API Key |
+| `GET` | `/api/v1/webhooks/endpoints` | Listar webhooks | API Key |
 
 ## 💰 Precios
 
-| Tier | Precio | Límite API | Para |
-|------|--------|-----------|------|
-| **GRATIS** | $0/mes | 30 req/min, 150/día | Developers probando |
-| **PREPAGO** (c402) | Desde $2,500 COP | 50/200/1000 calls vía Wompi | Usuarios ocasionales |
-| **AGENTE API** | $30K COP/mes | 100 req/min, 1,000/día | Integradores y startups |
-| **CONJUNTO API** | $150K COP/mes | 300 req/min, 5,000/día | Empresas y fintechs |
-| **EMPRESARIAL** | Cotizar | Personalizado | Bancos y govtech |
+| Tier | Precio | Límite API | Para | Compra |
+|------|--------|-----------|------|--------|
+| **GRATIS** | $0/mes | 30 req/min, 150/día | Developers probando | Sin API key |
+| **PREPAGO** (c402) | Desde $2,500 COP | 50/200/1000 calls | Usuarios ocasionales | [`/precios`](https://xpequi.xyz/precios) |
+| **AGENTE API** | $30K COP/mes | 100 req/min, 1,000/día | Integradores y startups | [`/precios`](https://xpequi.xyz/precios) |
+| **CONJUNTO API** | $150K COP/mes | 300 req/min, 5,000/día | Empresas y fintechs | [`/precios`](https://xpequi.xyz/precios) |
+| **EMPRESARIAL** | Cotizar | Personalizado | Bancos y govtech | [Contacto](mailto:contact@xpequi.xyz) |
+
+> **Sin API key para GET públicos:** Los endpoints de lectura (properties, barrios, benchmarks, geocode, UVR, IPC, complexes) funcionan sin autenticación. Solo los endpoints de escritura requieren API key.
+> 
+> **Compra desde la web:** Ve a [`/precios`](https://xpequi.xyz/precios) — inicia sesión con Clerk y paga directo vía Wompi (PSE, Nequi, Daviplata, tarjeta). Sin necesidad de API key para comprar.
 
 ## 💳 c402 Protocol — HTTP 402 Payment Required
 
@@ -130,21 +143,43 @@ Pequi implements the **c402 Protocol** for HTTP 402 Payment Required — a Colom
 
 - **Agents:** When a FREE-tier request exceeds the rate limit and has no prepaid credits, the API returns `HTTP 402 Payment Required` with an `X-402-Challenge` header containing a Wompi checkout URL
 - **Prepaid Credits:** Purchase credit packs (50/200/1000 calls) via Wompi Web Checkout (PSE, Nequi, DaviPlata, credit/debit card)
+- **Monthly Subscriptions:** API AGENTE ($30K/mes, 1,000 req/día) and API CONJUNTO ($150K/mes, 5,000 req/día)
 - **Security:** SHA-256 webhook verification, UUID v4 nonces (single-use via Redis), atomic credit deduction (no race conditions), 24h idempotency guard
 - **Zero crypto:** No blockchain, no wallets, no RSA — only SHA-256 + Redis atomic operations
 - **Data Privacy:** Only public/anonymized data is ever sold. No PII exposure.
 
+**402 Response Example:**
+```json
+HTTP/1.1 402 Payment Required
+X-402-Challenge: {"nonce":"550e8400-...", "amount":2500, "currency":"COP", "calls":50, "paymentUrl":"https://checkout.wompi.co/p/?"}
+
+{
+  "error": "payment_required",
+  "message": "Has excedido tu límite gratuito. Paga por más llamadas API.",
+  "code": "PAYMENT_REQUIRED",
+  "recoverable": true,
+  "suggestedAction": "Compra créditos prepago o suscríbete en https://xpequi.xyz/precios",
+  "c402": {
+    "nonce": "550e8400-...",
+    "amount": 2500,
+    "currency": "COP",
+    "calls": 50,
+    "paymentUrl": "https://checkout.wompi.co/p/?",
+    "expiresAt": "2026-05-15T22:00:00Z"
+  }
+}
 ```
-GET /api/v1/properties
-Authorization: Bearer pequi_key_abc123
 
-→ HTTP 402 Payment Required
-X-402-Challenge: {"nonce":"...", "amount":2500, "currency":"COP", "paymentUrl":"https://checkout.wompi.co/p/?..."}
-```
+**For AI Agents:** Check `error.code === 'PAYMENT_REQUIRED'`. The `c402.paymentUrl` is a Wompi checkout URL. Present it to the user. After payment, retry with `X-402-Payment-Id` header. Prepaid credits avoid 402 entirely — just keep a positive balance.
 
-**For AI Agents:** The `recoverable: true` error envelope tells agents to present the payment URL to the user. Prepaid credits avoid 402 entirely — just keep a positive balance.
+**How to buy (no API key needed):**
+1. Go to [`/precios`](https://xpequi.xyz/precios)
+2. Click "COMPRAR →" on your chosen tier
+3. Sign in with Clerk (Google, email, or magic link)
+4. Pay via Wompi (PSE, Nequi, Daviplata, credit/debit card)
+5. Credits or tier activate automatically via webhook
 
-See full spec: [`docs/strategy/c402-MONETIZATION.md`](https://github.com/MCPVOT/pequi/blob/master/docs/strategy/c402-MONETIZATION.md) (private repo)
+See full blog post: [c402 — pagos agénticos sin crypto](https://xpequi.xyz/blog/c402-pagos-ia-colombia)
 
 ## 🔗 Links
 
@@ -172,7 +207,19 @@ Pequi's API is available natively inside every major AI assistant and coding age
 | **OpenClaw** | Gateway Plugin | JavaScript plugin in `packages/openclaw-plugin/pequi-gateway.js` |
 | **Hermes** | Skill | Skill file on droplet — overnight autonomous planning |
 
-All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min general, 5 req/min chat). Chat has lower limits to protect AI costs.
+All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
+
+### MCP Tools Available (7 tools)
+
+| Tool | Description |
+|------|-------------|
+| `search_properties` | Buscar propiedades con filtros |
+| `get_barrios` | Obtener barrios con estrato y GIS |
+| `get_benchmarks` | Precios de referencia por m² |
+| `geocode` | Geocodificar dirección colombiana |
+| `get_uvr` | UVR actual del Banco de la República |
+| `get_ipc` | IPC anual para ajustes Ley 820 |
+| `calculate_rent_increase` | Calcular incremento legal de arriendo |
 
 ## 🧠 Model Providers
 
@@ -217,7 +264,7 @@ All API errors now return a standardized envelope that AI agents can parse deter
 }
 ```
 
-Error codes: `INVALID_API_KEY`, `RATE_LIMIT_EXCEEDED`, `QUOTA_EXCEEDED`, `BAD_REQUEST`,
+Error codes: `INVALID_API_KEY`, `RATE_LIMIT_EXCEEDED`, `PAYMENT_REQUIRED`, `QUOTA_EXCEEDED`, `BAD_REQUEST`,
 `VALIDATION_ERROR`, `INTERNAL_ERROR`, `SERVICE_UNAVAILABLE`, `NOT_FOUND`, `INSUFFICIENT_SCOPE`.
 
 **Agent tip:** Use `recoverable` to decide whether to retry. Use `retryAfter` for backoff.

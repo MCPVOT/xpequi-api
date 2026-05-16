@@ -4,17 +4,24 @@ All notable changes to the Pequi API platform will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.3.0] — 2026-05-15
+## [0.3.1] — 2026-05-15
+
+### Fixed
+- README: Added note that npm packages are pending publication (GitHub billing block)
+- README: Expanded endpoint table from 16 to 24 entries (added AVM, UVR, IPC, rent-increase, credits, subscriptions, monitoring/usage, webhooks, bank-verification)
+- README: Added `PAYMENT_REQUIRED` error code to docs
+- README: Added full 402 response JSON example for AI agents
+- README: Added MCP tools table listing all 7 available tools
+- README: Added Clerk-authed purchase flow info (no API key needed to buy)
+- README: Added "Sin API key para GET públicos" note to pricing section
+- README: Fixed c402 spec link — now links to public blog post instead of private repo
+- README: Pricing table now includes "Compra" column with direct links
+- `package.json`: version synced to 0.3.1 (was 0.1.0)
 
 ### Added
-- c402 Protocol branding — HTTP 402 Payment Required for exceeded FREE-tier limits
-- Prepaid credit packs (50/200/1000 calls via Wompi) with automatic fallback
-- `c402` badge, tags, and documentation in README and MCP manifest
-- README section explaining c402 protocol for AI agents
+- Subscription tiers (AGENTE API $30K/mo, CONJUNTO API $150K/mo) documented in c402 section
 
-### Changed
-- `mcp.json`: tools count updated to 7, tags include `c402`, `uvr`, `ipc`, `open-finance`
-- `package.json`: keywords include `c402`, `http-402`, `prepaid-credits`, `uvr`, `ipc`
+## [0.3.0] — 2026-05-15
 
 ## [0.2.0] — 2026-05-12
 
