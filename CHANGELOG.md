@@ -4,6 +4,27 @@ All notable changes to the Pequi API platform will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.2] — 2026-05-15
+
+### Added
+- TypeScript SDK: 12 new methods — AVM, AVM bulk, UVR, IPC, rent-increase,
+  credits balance, credit purchase, subscription checkout, usage monitoring,
+  bank verification, webhook delete, webhook test
+- TypeScript SDK: `PequiApiError` class with structured error fields (code,
+  recoverable, retryAfter, requestId) — parses standardized API error envelope
+- TypeScript SDK: `_del()` helper for DELETE requests (was using raw fetch)
+- Python SDK: 6 new sub-APIs — `client.avm`, `client.finance` (UVR/IPC/rent),
+  `client.credits` (balance/purchase/subscription), `client.bank_verification`,
+  `client.monitoring` (usage/latency/errors/uptime), `client.webhooks`
+- Python SDK: `PequiApiError` exception class with structured fields
+- Python SDK: `_delete()` method and `session_id` on chat.send()
+
+### Changed
+- TypeScript SDK: API client `0.1.0` → `0.3.1` (synced with root)
+- TypeScript SDK: Unified `_request()` base method replacing get/post/postForm/del
+- Python SDK: Unified `_request()` base method with proper HTTP method support
+- README endpoint table now covers all 28 API endpoints
+
 ## [0.3.1] — 2026-05-15
 
 ### Fixed
