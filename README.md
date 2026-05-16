@@ -14,9 +14,9 @@
 
 <p align="center">
   <a href="https://xpequi.xyz"><img src="https://img.shields.io/badge/xpequi.xyz-00e5ff?style=flat-square&logo=vercel&logoColor=white" alt="Website" /></a>
-  <a href="https://www.npmjs.com/package/@MCPVOT/api-client"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fapi--client-3178c6?style=flat-square&logo=npm&logoColor=white" alt="npm" /></a>
-  <a href="https://www.npmjs.com/package/@MCPVOT/mcp-server"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fmcp--server-7b2d8e?style=flat-square&logo=npm&logoColor=white" alt="npm MCP" /></a>
-  <a href="https://www.npmjs.com/package/@MCPVOT/api-client"><img src="https://img.shields.io/npm/dw/@MCPVOT/api-client?style=flat-square&color=orange" alt="npm downloads" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fapi--client-3178c6?style=flat-square&logo=npm&logoColor=white" alt="TypeScript SDK" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fmcp--server-7b2d8e?style=flat-square&logo=npm&logoColor=white" alt="MCP Server" /></a>
+  <a href="https://pypi.org/project/pequi-api-client/"><img src="https://img.shields.io/badge/pypi-pequi--api--client-3776ab?style=flat-square&logo=pypi&logoColor=white" alt="PyPI" /></a>
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
   <img src="https://img.shields.io/badge/MCP-directory-blue?style=flat-square&logo=modelcontextprotocol" alt="MCP Directory" />
   <a href="https://smithery.ai"><img src="https://img.shields.io/badge/Smithery-Pequi%20API-orange?style=flat-square" alt="Smithery" /></a>
@@ -27,9 +27,15 @@
 
 ---
 
+**Pequi** es la primera API pública de datos inmobiliarios de Colombia. Busca propiedades, consulta barrios con estratos, obtén precios de referencia por m², valúa inmuebles con AVM y accede a indicadores financieros (UVR/IPC) en tiempo real — todo para **Ibagué (64 barrios)** y **Bogotá (212 barrios)**.
+
+Basado en [Open Finance · Decreto 0368](https://xpequi.xyz/blog/open-finance-decreto-0368). Transparente, sin bloqueo de proveedor, sin sorpresas.
+
+---
+
 ## Quick Start
 
-Try the API right now — no API key required:
+Try the API right now — no API key required. Three commands, zero setup:
 
 ```bash
 # Search properties in Bogotá
@@ -83,11 +89,17 @@ const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
 | **`pequi-api-client`** | `pip install pequi-api-client` | Python SDK — fluent interface, 16 sub-APIs |
 | **`@MCPVOT/mcp-server`** | `npx -y @MCPVOT/mcp-server` | MCP server for Claude Desktop, Cursor, Copilot |
 
-> **Note:** npm packages are on GitHub Packages with pending publication due to billing limits. Until resolved, use the REST endpoints directly or install from [GitHub Packages](https://github.com/MCPVOT/xpequi-api/packages). The API is fully functional without an SDK.
+> **⚠️ Package availability:** The npm packages are ready but pending publication on the public registry due to GitHub billing limits. The API is fully functional via REST endpoints without an SDK. Browse the packages at [GitHub Packages →](https://github.com/MCPVOT/xpequi-api/packages) or use the curl examples throughout this doc.
 
 ---
 
 ## TypeScript SDK
+
+Full type safety with 31 methods covering every API endpoint. Install from GitHub Packages:
+
+```bash
+npm install @MCPVOT/api-client
+```
 
 ```typescript
 import { PequiClient, PequiApiError } from '@MCPVOT/api-client'
@@ -167,13 +179,20 @@ const uptime = await client.getUptime('24h')
 
 // ── Error handling ─────────────────────────────────────────
 try {
-  await client.searchProperties({ city: 'invalid' })
+  const props = await client.searchProperties({ city: 'invalid' })
 } catch (err) {
   if (err instanceof PequiApiError) {
-    console.log(err.status)      // 400
-    console.log(err.code)        // 'BAD_REQUEST'
-    console.log(err.recoverable) // false
-    console.log(err.message)     // Human-readable error
+    switch (err.code) {
+      case 'RATE_LIMIT_EXCEEDED':
+      case 'PAYMENT_REQUIRED':
+        console.log(`⏳ Wait ${err.retryAfter}s or buy credits`)
+        break
+      case 'INVALID_API_KEY':
+        console.log('🔑 Get a key at https://xpequi.xyz/developers')
+        break
+      default:
+        console.log(`❌ ${err.code}: ${err.message}`)
+    }
   }
 }
 ```
@@ -181,6 +200,12 @@ try {
 ---
 
 ## Python SDK
+
+Fluent sub-API design with 16 domains. Zero external dependencies (stdlib only):
+
+```bash
+pip install pequi-api-client
+```
 
 ```python
 from pequi_api_client import PequiClient, PequiApiError
@@ -345,7 +370,7 @@ All errors return a standardized envelope that both human developers and AI agen
 | `PAYMENT_REQUIRED` | 402 | FREE tier exceeded — buy credits (see c402) | ✅ |
 | `QUOTA_EXCEEDED` | 429 | Daily subscription limit reached | ✅ |
 | `BAD_REQUEST` | 400 | Invalid input — check the error message | ❌ |
-| `VALIDATION_ERROR` | 400 | Zod schema validation failed | ❌ |
+| `VALIDATION_ERROR` | 422 | Zod schema validation failed | ❌ |
 | `INTERNAL_ERROR` | 500 | Server error — contact support | ❌ |
 | `SERVICE_UNAVAILABLE` | 503 | Upstream provider down — retry later | ✅ |
 
@@ -422,7 +447,6 @@ Pequi implements the **c402 Protocol** — a Colombian-first HTTP 402 Payment Re
 4. Pay via Wompi — credits/tier activate automatically
 
 ```json
-// HTTP 402 Response Example
 {
   "error": "payment_required",
   "message": "Has excedido tu límite gratuito. Paga por más llamadas API.",
