@@ -2,7 +2,7 @@
 # Colombian real estate data for developers.
 # https://xpequi.xyz/developers
 
-from pequi_api_client.client import PequiClient
+from pequi_api_client.client import PequiClient, PequiApiError
 from pequi_api_client.models import (
     Property,
     Barrio,
@@ -16,6 +16,7 @@ from pequi_api_client.models import (
 
 __all__ = [
     "PequiClient",
+    "PequiApiError",
     "Property",
     "Barrio",
     "Benchmark",

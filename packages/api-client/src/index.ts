@@ -330,7 +330,7 @@ export class PequiClient {
     method: string,
     path: string,
     body?: unknown,
-    opts?: { isFormData?: boolean; params?: Record<string, string | undefined> },
+    opts?: { isFormData?: boolean; params?: Record<string, string | undefined>; headers?: Record<string, string> },
   ): Promise<T> {
     const url = new URL(`${this.baseUrl}${path}`)
     if (opts?.params) {
@@ -339,7 +339,7 @@ export class PequiClient {
       })
     }
 
-    const headers: Record<string, string> = { 'Accept': 'application/json' }
+    const headers: Record<string, string> = { 'Accept': 'application/json', ...opts?.headers }
     if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`
     if (body && !opts?.isFormData) {
       headers['Content-Type'] = 'application/json'
@@ -369,8 +369,8 @@ export class PequiClient {
     return this.request<T>('GET', path, undefined, { params })
   }
 
-  private async post<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>('POST', path, body)
+  private async post<T>(path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
+    return this.request<T>('POST', path, body, { headers })
   }
 
   private async del<T = void>(path: string): Promise<T> {
@@ -432,7 +432,7 @@ export class PequiClient {
   ): Promise<{ results: AVMResult[]; creditsUsed: number }> {
     const headers: Record<string, string> = {}
     if (idempotencyKey) headers['x-idempotency-key'] = idempotencyKey
-    const data = await this.post<any>('/avm/bulk', { properties })
+    const data = await this.post<any>('/avm/bulk', { properties }, headers)
     return data.data || data
   }
 

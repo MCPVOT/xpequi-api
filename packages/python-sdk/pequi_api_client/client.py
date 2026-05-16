@@ -162,10 +162,10 @@ class _AVMAPI:
     def bulk(self, properties: list[dict],
              idempotency_key: Optional[str] = None) -> dict:
         body = {"properties": properties}
-        headers = {}
+        extra_headers = {}
         if idempotency_key:
-            headers["x-idempotency-key"] = idempotency_key
-        data = self._client._post("/avm/bulk", body, headers)
+            extra_headers["x-idempotency-key"] = idempotency_key
+        data = self._client._post("/avm/bulk", body, extra_headers)
         return data.get("data", data)
 
 
