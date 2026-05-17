@@ -1,64 +1,86 @@
 <p align="center">
   <a href="https://xpequi.xyz">
-    <img src="https://xpequi.xyz/pequi-logo.svg" alt="Pequi" width="120" />
+    <img src="https://xpequi.xyz/pequi-logo.svg" alt="Pequi" width="100" />
   </a>
 </p>
 
-<h1 align="center">Pequi API</h1>
+<h1 align="center">
+  <a href="https://github.com/MCPVOT/xpequi-api">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=00E5FF&center=true&vCenter=true&multiline=false&repeat=true&width=500&height=50&lines=Pequi+API;Colombia's+First+Real+Estate+Data+API;c402+Protocol+%7C+Open+Finance+%7C+18+Endpoints" alt="Typing SVG" />
+  </a>
+</p>
 
 <p align="center">
-  <strong>Colombia's First Real Estate Data API</strong><br />
+  <em>Colombia's First Real Estate Data API</em><br />
   <em>API pública de datos inmobiliarios — Ibagué (64 barrios) + Bogotá (212 barrios)</em><br />
-  <a href="https://xpequi.xyz/blog/open-finance-decreto-0368">Open Finance · Decreto 0368</a>
+  <a href="https://xpequi.xyz/blog/open-finance-decreto-0368"><strong>Open Finance · Decreto 0368</strong></a>
 </p>
 
 <p align="center">
   <a href="https://xpequi.xyz"><img src="https://img.shields.io/badge/xpequi.xyz-00e5ff?style=flat-square&logo=vercel&logoColor=white" alt="Website" /></a>
-  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fapi--client-3178c6?style=flat-square&logo=npm&logoColor=white" alt="TypeScript SDK" /></a>
-  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/npm-@MCPVOT%2Fmcp--server-7b2d8e?style=flat-square&logo=npm&logoColor=white" alt="MCP Server" /></a>
-  <a href="https://pypi.org/project/pequi-api-client/"><img src="https://img.shields.io/badge/pypi-pequi--api--client-3776ab?style=flat-square&logo=pypi&logoColor=white" alt="PyPI" /></a>
-  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
-  <img src="https://img.shields.io/badge/MCP-directory-blue?style=flat-square&logo=modelcontextprotocol" alt="MCP Directory" />
-  <a href="https://smithery.ai"><img src="https://img.shields.io/badge/Smithery-Pequi%20API-orange?style=flat-square" alt="Smithery" /></a>
-  <img src="https://img.shields.io/badge/Open%20Finance-Decreto%200368-ff8c00?style=flat-square" alt="Open Finance" />
-  <img src="https://img.shields.io/badge/c402-HTTP%20402%20Payment-00ff88?style=flat-square" alt="c402 Protocol" />
-  <a href="https://xpequi.xyz/api/health"><img src="https://img.shields.io/badge/status-online-brightgreen?style=flat-square" alt="Status" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/TypeScript_SDK-@MCPVOT%2Fapi--client-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript SDK" /></a>
+  <a href="https://pypi.org/project/pequi-api-client/"><img src="https://img.shields.io/badge/Python_SDK-pequi--api--client-3776ab?style=flat-square&logo=python&logoColor=white" alt="PyPI" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/MCP_Server-@MCPVOT%2Fmcp--server-7b2d8e?style=flat-square&logo=modelcontextprotocol&logoColor=white" alt="MCP Server" /></a>
+  <br />
+  <img src="https://img.shields.io/badge/license-MIT-00ff88?style=flat-square&labelColor=0d1117" alt="License" />
+  <img src="https://img.shields.io/badge/Status-Live-00ff88?style=flat-square&labelColor=0d1117" alt="Status" />
+  <img src="https://img.shields.io/badge/Chaîn-Base-0052FF?style=flat-square&logo=base&labelColor=0d1117" alt="Base" />
+  <img src="https://img.shields.io/badge/c402-HTTP_402_Payment-00ff88?style=flat-square&labelColor=0d1117" alt="c402" />
+  <img src="https://img.shields.io/badge/Open_Finance-Decreto_0368-ff7700?style=flat-square&labelColor=0d1117" alt="Open Finance" />
+  <img src="https://img.shields.io/badge/Ibagué-64_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Ibagué" />
+  <img src="https://img.shields.io/badge/Bogotá-212_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Bogotá" />
 </p>
 
 ---
 
-**Pequi** es la primera API pública de datos inmobiliarios de Colombia. Busca propiedades, consulta barrios con estratos, obtén precios de referencia por m², valúa inmuebles con AVM y accede a indicadores financieros (UVR/IPC) en tiempo real — todo para **Ibagué (64 barrios)** y **Bogotá (212 barrios)**.
+<table>
+<tr>
+<td width="50%" valign="top">
 
-Basado en [Open Finance · Decreto 0368](https://xpequi.xyz/blog/open-finance-decreto-0368). Transparente, sin bloqueo de proveedor, sin sorpresas.
+### 🏗️ What is Pequi API?
 
----
+Colombia's first public real estate data API — built on **Open Finance (Decreto 0368)**. Search properties, query neighborhoods with estratos, get reference prices per m², valuate properties with AVM, and access live financial indicators (UVR/IPC) from Banco de la República.
 
-## Quick Start
+**18 endpoints** covering:
+- Properties & neighborhoods (276 barrios across 2 cities)
+- Price benchmarks & AVM valuation
+- Live UVR, IPC, Ley 820 rent adjustment
+- Contract generation & Wompi payments
+- Bank verification via Prometeo Open Finance
+- AI chat with streaming SSE
+- **c402 monetization** — HTTP 402 Payment Required
 
-Try the API right now — no API key required. Three commands, zero setup:
+</td>
+<td width="50%" valign="top">
+
+### ⚡ Quick Start
+
+No API key needed for GET endpoints:
 
 ```bash
-# Search properties in Bogotá
+# Search properties
 curl https://xpequi.xyz/api/v1/properties?city=bogota&limit=3
 
-# Get neighborhoods with estratos
+# Neighborhoods with estratos  
 curl https://xpequi.xyz/api/v1/barrios?city=ibague
 
-# Current UVR (Unidad de Valor Real) from Banco de la República
+# Live UVR from Banco de la República
 curl https://xpequi.xyz/api/v1/uvr
 
-# Annual IPC inflation — for Ley 820 rent adjustments
+# IPC inflation — Ley 820 rent adjustment
 curl https://xpequi.xyz/api/v1/ipc
 ```
 
 Or use the TypeScript SDK:
-
 ```typescript
 import { PequiClient } from '@MCPVOT/api-client'
-
 const client = new PequiClient()
-const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
+const props = await client.searchProperties({ city: 'bogota', limit: 5 })
 ```
+
+</td>
+</tr>
+</table>
 
 > **No API key needed** for GET endpoints (properties, barrios, benchmarks, geocode, UVR, IPC, complexes). Only write operations require authentication. [Get your free API key →](https://xpequi.xyz/developers)
 
@@ -83,13 +105,15 @@ const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
 
 ## SDK Installation
 
-| Package | Install | Description |
-|---------|---------|-------------|
-| **`@MCPVOT/api-client`** | `npm install @MCPVOT/api-client` | TypeScript SDK — full type safety, 31 methods |
-| **`pequi-api-client`** | `pip install pequi-api-client` | Python SDK — fluent interface, 16 sub-APIs |
-| **`@MCPVOT/mcp-server`** | `npx -y @MCPVOT/mcp-server` | MCP server for Claude Desktop, Cursor, Copilot |
+| Package | Install | Description | Status |
+|---------|---------|-------------|--------|
+| **TypeScript SDK** | `npm install @MCPVOT/api-client` | 31 methods · full type safety · every endpoint | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
+| **Python SDK** | `pip install pequi-api-client` | 16 sub-APIs · fluent interface · zero deps | <img src="https://img.shields.io/badge/PyPI-3776ab?style=flat-square&labelColor=0d1117" /> |
+| **MCP Server** | `npx -y @MCPVOT/mcp-server` | Claude Desktop · Cursor · Copilot · Smithery | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
+| **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway for Pequi API | <img src="https://img.shields.io/badge/Plugin-ff7700?style=flat-square&labelColor=0d1117" /> |
+| **Ollama Tool** | `packages/ollama-tool/` | Local LLM property search via Ollama | <img src="https://img.shields.io/badge/Tool-00e5ff?style=flat-square&labelColor=0d1117" /> |
 
-> **⚠️ Package availability:** The npm packages are ready but pending publication on the public registry due to GitHub billing limits. The API is fully functional via REST endpoints without an SDK. Browse the packages at [GitHub Packages →](https://github.com/MCPVOT/xpequi-api/packages) or use the curl examples throughout this doc.
+> **⚠️ Package availability:** npm packages pending publication on public registry due to GitHub billing limits. The API is fully functional via REST endpoints without an SDK. Browse packages at [GitHub Packages →](https://github.com/MCPVOT/xpequi-api/packages) or use the curl examples throughout this doc.
 
 ---
 
