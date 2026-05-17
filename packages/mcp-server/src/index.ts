@@ -105,6 +105,22 @@ const CalculateRentIncreaseSchema = z.object({
   ipc: z.coerce.number().optional().describe('IPC variation rate (defaults to current IPC if not provided)'),
 })
 
+const GetUPZsSchema = z.object({
+  localidad: z.string().optional().describe('Filter by localidad name (e.g. "Usaquén", "Chapinero")'),
+  zone: z.enum(['norte', 'centro', 'occidente', 'sur']).optional().describe('Filter by cardinal zone'),
+  hasTransmilenio: z.coerce.boolean().optional().describe('Filter by TransMilenio coverage'),
+})
+
+const GetCadastralValuationSchema = z.object({
+  localidad: z.string().describe('Localidad name (e.g. "Usaquén", "Chapinero")'),
+  estrato: z.coerce.number().min(1).max(6).optional().describe('Filter by stratum (1-6)'),
+})
+
+const GetMortgageRatesSchema = z.object({
+  bank: z.string().optional().describe('Filter by bank name (e.g. "Bancolombia", "Davivienda")'),
+  product: z.enum(['vivienda_nueva', 'vivienda_usada', 'vis', 'remodelacion', 'lote', 'leasing']).optional().describe('Filter by product type'),
+})
+
 // ─── Tool Definitions ─────────────────────────────────────────────
 
 const TOOLS: Array<{
@@ -197,6 +213,41 @@ const TOOLS: Array<{
         ipc: { type: 'number', description: 'Optional IPC variation rate to use (e.g., 5.82). Defaults to current IPC from BanRep if not provided.' },
       },
       required: ['currentRent'],
+    },
+  },
+  {
+    name: 'get_upzs',
+    description: `Query Bogotá UPZ (Unidad de Planeamiento Zonal) boundary data — 117 planning units across all 20 localidades. Each UPZ includes: bounding box, area (hectares), predominant land use (residential/commercial/industrial/institutional/mixed/rural), estrato range, building height limits (floors), and TransMilenio coverage. Filter by localidad, cardinal zone (norte/centro/occidente/sur), or TransMilenio access. Essential for urban planning analysis and property development research.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        localidad: { type: 'string', description: 'Filter by localidad name (e.g. "Usaquén", "Chapinero", "Suba")' },
+        zone: { type: 'string', enum: ['norte', 'centro', 'occidente', 'sur'], description: 'Filter by cardinal zone' },
+        hasTransmilenio: { type: 'boolean', description: 'Filter by TransMilenio trunk line coverage' },
+      },
+    },
+  },
+  {
+    name: 'get_cadastral_valuation',
+    description: `Get IGAC cadastral reference values (avalúo catastral) for Bogotá by localidad and socioeconomic stratum. Returns: valor catastral per m² (constructed), land value per m², estimated market price per m² (2-5x cadastral), and year-over-year change. Based on IGAC 2025-2026 biennial update. These values determine property tax (impuesto predial) calculations.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        localidad: { type: 'string', description: 'Localidad name (e.g. "Usaquén", "Chapinero", "Suba"). Required.' },
+        estrato: { type: 'number', description: 'Filter by socioeconomic stratum (1-6)', minimum: 1, maximum: 6 },
+      },
+      required: ['localidad'],
+    },
+  },
+  {
+    name: 'get_mortgage_rates',
+    description: `Get current mortgage rates from Colombian banks — 34 products across 10 banks. Data from Superfinanciera de Colombia (April 2026). Each product includes: effective annual rate (TEA), spread over UVR, max term, LTV range, monthly payment per COP 1M, and year-over-year change. Supports filtering by bank and product type (new home, used home, VIS, remodeling, lot, leasing). Includes helper functions: getLowestVisRate, calculateMonthlyPayment, getMarketSummary.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        bank: { type: 'string', description: 'Filter by bank name (e.g. "Bancolombia", "Davivienda", "Banco de Bogotá", "BBVA")' },
+        product: { type: 'string', enum: ['vivienda_nueva', 'vivienda_usada', 'vis', 'remodelacion', 'lote', 'leasing'], description: 'Filter by product type' },
+      },
     },
   },
 ]
@@ -329,6 +380,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             type: 'text',
             text: JSON.stringify(result, null, 2),
           }],
+        }
+      }
+
+      case 'get_upzs': {
+        const params = GetUPZsSchema.parse(args || {})
+        const data = await apiGet('/bogota/upz', {
+          localidad: params.localidad,
+          zone: params.zone,
+          hasTransmilenio: params.hasTransmilenio?.toString(),
+        })
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+        }
+      }
+
+      case 'get_cadastral_valuation': {
+        const params = GetCadastralValuationSchema.parse(args || {})
+        const data = await apiGet('/bogota/cadastral', {
+          localidad: params.localidad,
+          estrato: params.estrato?.toString(),
+        })
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+        }
+      }
+
+      case 'get_mortgage_rates': {
+        const params = GetMortgageRatesSchema.parse(args || {})
+        const data = await apiGet('/mortgage-rates', {
+          bank: params.bank,
+          product: params.product,
+        })
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
         }
       }
 
