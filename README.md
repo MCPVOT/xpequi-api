@@ -12,7 +12,7 @@
 
 <p align="center">
   <em>Colombia's First Real Estate Data API</em><br />
-  <em>API pública de datos inmobiliarios — Ibagué (64 barrios) + Bogotá (212 barrios)</em><br />
+  <em>API publica de datos inmobiliarios — Ibague (64 barrios) + Bogota (212 barrios)</em><br />
   <a href="https://xpequi.xyz/blog/open-finance-decreto-0368"><strong>Open Finance · Decreto 0368</strong></a>
 </p>
 
@@ -24,63 +24,60 @@
   <br />
   <img src="https://img.shields.io/badge/license-MIT-00ff88?style=flat-square&labelColor=0d1117" alt="License" />
   <img src="https://img.shields.io/badge/Status-Live-00ff88?style=flat-square&labelColor=0d1117" alt="Status" />
-  <img src="https://img.shields.io/badge/Chaîn-Base-0052FF?style=flat-square&logo=base&labelColor=0d1117" alt="Base" />
+  <img src="https://img.shields.io/badge/Chain-Base-0052FF?style=flat-square&logo=base&labelColor=0d1117" alt="Base" />
   <img src="https://img.shields.io/badge/c402-HTTP_402_Payment-00ff88?style=flat-square&labelColor=0d1117" alt="c402" />
   <img src="https://img.shields.io/badge/Open_Finance-Decreto_0368-ff7700?style=flat-square&labelColor=0d1117" alt="Open Finance" />
-  <img src="https://img.shields.io/badge/Ibagué-64_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Ibagué" />
-  <img src="https://img.shields.io/badge/Bogotá-212_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Bogotá" />
+  <img src="https://img.shields.io/badge/Ibague-64_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Ibagué" />
+  <img src="https://img.shields.io/badge/Bogota-212_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Bogotá" />
+  <img src="https://img.shields.io/badge/API-276_endpoints-00ff88?style=flat-square&labelColor=0d1117" alt="Endpoints" />
 </p>
 
 ---
 
-<table>
-<tr>
-<td width="50%" valign="top">
+## Overview
 
-### 🏗️ What is Pequi API?
-
-Colombia's first public real estate data API — built on **Open Finance (Decreto 0368)**. Search properties, query neighborhoods with estratos, get reference prices per m², valuate properties with AVM, and access live financial indicators (UVR/IPC) from Banco de la República.
+Colombia's first public real estate data API — built on **Open Finance (Decreto 0368)**. Search properties, query neighborhoods with estratos, get reference prices per m², valuate properties with AVM, and access live financial indicators (UVR/IPC) from Banco de la Republica.
 
 **18 endpoints** covering:
-- Properties & neighborhoods (276 barrios across 2 cities)
-- Price benchmarks & AVM valuation
-- Live UVR, IPC, Ley 820 rent adjustment
-- Contract generation & Wompi payments
-- Bank verification via Prometeo Open Finance
-- AI chat with streaming SSE
-- **c402 monetization** — HTTP 402 Payment Required
 
-</td>
-<td width="50%" valign="top">
+| Capability | Endpoints | Auth |
+|------------|-----------|------|
+| Properties & neighborhoods (276 barrios, 2 cities) | `GET /api/v1/properties` `GET /api/v1/barrios` | Free |
+| Price benchmarks & AVM valuation | `GET /api/v1/benchmarks` `POST /api/v1/avm` | Free |
+| Live UVR, IPC, Ley 820 rent adjustment | `GET /api/v1/uvr` `GET /api/v1/ipc` `POST /api/v1/rent-increase` | Free |
+| Contract generation & Wompi payments | `POST /api/v1/contracts` `POST /api/v1/payments` | API Key |
+| Bank verification (Prometeo Open Finance) | `POST /api/v1/bank-verification` | API Key |
+| AI chat with streaming SSE | `POST /api/v1/chat` | API Key |
+| **c402 monetization** — HTTP 402 Payment Required | `GET /api/v1/credits` `POST /api/v1/credits/purchase` | Free |
 
-### ⚡ Quick Start
+---
 
-No API key needed for GET endpoints:
+## Quick Start
+
+No API key needed for GET endpoints. Three commands, zero setup:
 
 ```bash
-# Search properties
+# Search properties in Bogota
 curl https://xpequi.xyz/api/v1/properties?city=bogota&limit=3
 
-# Neighborhoods with estratos  
+# Neighborhoods with estratos
 curl https://xpequi.xyz/api/v1/barrios?city=ibague
 
-# Live UVR from Banco de la República
+# Live UVR from Banco de la Republica
 curl https://xpequi.xyz/api/v1/uvr
 
-# IPC inflation — Ley 820 rent adjustment
+# IPC inflation - Ley 820 rent adjustment
 curl https://xpequi.xyz/api/v1/ipc
 ```
 
 Or use the TypeScript SDK:
+
 ```typescript
 import { PequiClient } from '@MCPVOT/api-client'
-const client = new PequiClient()
-const props = await client.searchProperties({ city: 'bogota', limit: 5 })
-```
 
-</td>
-</tr>
-</table>
+const client = new PequiClient()
+const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
+```
 
 > **No API key needed** for GET endpoints (properties, barrios, benchmarks, geocode, UVR, IPC, complexes). Only write operations require authentication. [Get your free API key →](https://xpequi.xyz/developers)
 
