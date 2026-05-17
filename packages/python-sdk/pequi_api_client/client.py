@@ -367,14 +367,57 @@ class _BankVerificationAPI:
         return data.get("data", data)
 
 
-class _MonitoringAPI:
-    """Wrapper around /api/v1/monitoring/* endpoints"""
+class _BogotaDataAPI:
+    """Wrapper around GET /api/v1/bogota/* and /api/v1/mortgage-rates"""
 
     def __init__(self, client: "PequiClient"):
         self._client = client
 
-    def usage(self) -> dict:
+    def get_upzs(self, localidad: Optional[str] = None,
+                  zone: Optional[str] = None,
+                  has_transmilenio: Optional[bool] = None) -> list[dict]:
+        params = {}
+        if localidad: params["localidad"] = localidad
+        if zone: params["zone"] = zone
+        if has_transmilenio is not None: params["hasTransmilenio"] = str(has_transmilenio).lower()
+        data = self._client._get("/bogota/upz", params)
+        return data.get("data", data)
+
+    def get_cadastral_valuation(self, localidad: str, estrato: Optional[int] = None) -> list[dict]:
+        params = {"localidad": localidad}
+        if estrato is not None: params["estrato"] = str(estrato)
+        data = self._client._get("/bogota/cadastral", params)
+        return data.get("data", data)
+
+    def get_mortgage_rates(self, bank: Optional[str] = None,
+                            product: Optional[str] = None) -> list[dict]:
+        params = {}
+        if bank: params["bank"] = bank
+        if product: params["product"] = product
+        data = self._client._get("/mortgage-rates", params)
+        return data.get("data", data)
+
+
+class _MonitoringAPI:
+    """Wrapper around GET /api/v1/monitoring/*"""
+
+    def __init__(self, client: "PequiClient"):
+        self._client = client
+
+    def get_usage(self) -> dict:
         data = self._client._get("/monitoring/usage")
+        return data.get("data", data)
+
+    def get_latency(self, quantile: str = "p95") -> dict:
+        data = self._client._get("/monitoring/latency", {"quantile": quantile})
+        return data.get("data", data)
+
+    def get_errors(self) -> dict:
+        data = self._client._get("/monitoring/errors")
+        return data.get("data", data)
+
+    def get_uptime(self, window_: str = "24h") -> dict:
+        data = self._client._get("/monitoring/uptime", {"window": window_})
         return data.get("data", data)
 
     def latency(self, quantile: str = "p95") -> list[dict]:
@@ -448,6 +491,7 @@ class PequiClient:
         self.upload = _UploadAPI(self)
         self.bank_verification = _BankVerificationAPI(self)
         self.monitoring = _MonitoringAPI(self)
+        self.bogota = _BogotaDataAPI(self)
         self.webhooks = _WebhooksAPI(self)
 
     def _request(self, method: str, path: str,

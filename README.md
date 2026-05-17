@@ -511,12 +511,15 @@ Add to `claude_desktop_config.json`:
 | Tool | Description |
 |------|-------------|
 | `search_properties` | Search properties with filters (city, type, price, estrato, bedrooms) |
-| `get_barrios` | Get neighborhoods with estrato and GIS coordinates |
+| `get_barrios` | Get neighborhoods with estrato and GIS coordinates (Ibagué + Bogotá) |
 | `get_benchmarks` | Reference prices per m² by neighborhood |
 | `geocode` | Geocode Colombian addresses |
 | `get_uvr` | Current UVR from Banco de la República |
 | `get_ipc` | Annual IPC inflation for Ley 820 adjustments |
 | `calculate_rent_increase` | Calculate legal rent increase |
+| `get_upzs` | **NEW** Bogotá UPZ boundaries — 117 units, land use, TransMilenio |
+| `get_cadastral_valuation` | **NEW** IGAC cadastral reference values by localidad+estrato |
+| `get_mortgage_rates` | **NEW** 34 mortgage products from 10 Colombian banks |
 
 ---
 

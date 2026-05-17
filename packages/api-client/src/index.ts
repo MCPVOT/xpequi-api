@@ -187,6 +187,47 @@ export interface WebhookEndpoint {
   createdAt: string
 }
 
+export interface UPZData {
+  code: string
+  name: string
+  localidad: string
+  zone: string
+  center: { lat: number; lng: number }
+  bbox: [number, number, number, number]
+  areaHas: number
+  usoPredominante: string
+  estratoRange: [number, number]
+  alturasPisos: number
+  hasTransmilenio: boolean
+}
+
+export interface CadastralValuationData {
+  localidad: string
+  zone: string
+  estrato: number
+  valorReferenciaM2: number
+  valorTerrenoM2: number
+  vigencia: string
+  mercadoEstimadoM2: number
+  cambioPorcentual: number
+}
+
+export interface MortgageRateData {
+  banco: string
+  tipoProducto: string
+  tipoTasa: 'fija' | 'uvr_mas_spread'
+  tea: number
+  spreadUvrBps?: number
+  plazoMaxMeses: number
+  ltvMin: number
+  ltvMax: number
+  cuotaPorMillon: number
+  montoMinimo: number
+  esVis: boolean
+  fechaCorte: string
+  cambioAnualBps: number
+}
+
 export interface BankVerificationResult {
   verified: boolean
   bankName: string
@@ -518,6 +559,51 @@ export class PequiClient {
 
   async listMyVisits(): Promise<Visit[]> {
     const data = await this.get<any>('/visits/mine')
+    return data.data || data
+  }
+
+  // ── Bogotá Data ─────────────────────────────────────────────────
+
+  /**
+   * Get UPZ boundary data for Bogotá.
+   * Filter by localidad, zone (norte/centro/occidente/sur), or TransMilenio coverage.
+   */
+  async getUPZs(params?: {
+    localidad?: string
+    zone?: 'norte' | 'centro' | 'occidente' | 'sur'
+    hasTransmilenio?: boolean
+  }): Promise<UPZData[]> {
+    const data = await this.get<any>('/bogota/upz', {
+      localidad: params?.localidad,
+      zone: params?.zone,
+      hasTransmilenio: params?.hasTransmilenio?.toString(),
+    })
+    return data.data || data
+  }
+
+  /**
+   * Get IGAC cadastral reference values for Bogotá by localidad and stratum.
+   * These values determine property tax (impuesto predial).
+   */
+  async getCadastralValuation(localidad: string, estrato?: number): Promise<CadastralValuationData[]> {
+    const data = await this.get<any>('/bogota/cadastral', {
+      localidad,
+      estrato: estrato?.toString(),
+    })
+    return data.data || data
+  }
+
+  /**
+   * Get current mortgage rates from Colombian banks (Superfinanciera data, April 2026).
+   */
+  async getMortgageRates(params?: {
+    bank?: string
+    product?: 'vivienda_nueva' | 'vivienda_usada' | 'vis' | 'remodelacion' | 'lote' | 'leasing'
+  }): Promise<MortgageRateData[]> {
+    const data = await this.get<any>('/mortgage-rates', {
+      bank: params?.bank,
+      product: params?.product,
+    })
     return data.data || data
   }
 
