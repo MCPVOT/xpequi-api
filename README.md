@@ -6,7 +6,7 @@
 
 <h1 align="center">
   <a href="https://github.com/MCPVOT/xpequi-api">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=00E5FF&center=true&vCenter=true&multiline=false&repeat=true&width=500&height=50&lines=Pequi+API;Colombia's+First+Real+Estate+Data+API;c402+Protocol+%7C+Open+Finance+%7C+18+Endpoints" alt="Typing SVG" />
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=00E5FF&center=true&vCenter=true&multiline=false&repeat=true&width=500&height=50&lines=Pequi+API;Colombia's+First+Real+Estate+Data+API;c402+Protocol+%7C+Open+Finance+%7C+31+Endpoints" alt="Typing SVG" />
   </a>
 </p>
 
@@ -29,7 +29,7 @@
   <img src="https://img.shields.io/badge/Open_Finance-Decreto_0368-ff7700?style=flat-square&labelColor=0d1117" alt="Open Finance" />
   <img src="https://img.shields.io/badge/Ibague-64_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Ibagué" />
   <img src="https://img.shields.io/badge/Bogota-212_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Bogotá" />
-  <img src="https://img.shields.io/badge/API-276_endpoints-00ff88?style=flat-square&labelColor=0d1117" alt="Endpoints" />
+   <img src="https://img.shields.io/badge/API-31_endpoints-00ff88?style=flat-square&labelColor=0d1117" alt="Endpoints" />
 </p>
 
 ---
@@ -38,16 +38,24 @@
 
 Colombia's first public real estate data API — built on **Open Finance (Decreto 0368)**. Search properties, query neighborhoods with estratos, get reference prices per m², valuate properties with AVM, and access live financial indicators (UVR/IPC) from Banco de la Republica.
 
-**18 endpoints** covering:
+**31 endpoints** covering:
 
 | Capability | Endpoints | Auth |
 |------------|-----------|------|
 | Properties & neighborhoods (276 barrios, 2 cities) | `GET /api/v1/properties` `GET /api/v1/barrios` | Free |
-| Price benchmarks & AVM valuation | `GET /api/v1/benchmarks` `POST /api/v1/avm` | Free |
+| Price benchmarks & AVM valuation | `GET /api/v1/benchmarks` `POST /api/v1/avm` `POST /api/v1/avm/bulk` | Free/Key |
 | Live UVR, IPC, Ley 820 rent adjustment | `GET /api/v1/uvr` `GET /api/v1/ipc` `POST /api/v1/rent-increase` | Free |
+| Bogotá UPZ (117) & cadastral valuation | `GET /api/v1/bogota/upz` `GET /api/v1/bogota/cadastral` | Free |
+| Mortgage rates (34 products, 10 banks) | `GET /api/v1/mortgage-rates` | Free |
+| Geocoding (address → coordinates) | `GET /api/v1/geocode` | Free |
 | Contract generation & Wompi payments | `POST /api/v1/contracts` `POST /api/v1/payments` | API Key |
 | Bank verification (Prometeo Open Finance) | `POST /api/v1/bank-verification` | API Key |
 | AI chat with streaming SSE | `POST /api/v1/chat` | API Key |
+| Prepaid credits (c402) & subscriptions | `GET /api/v1/credits` `POST /api/v1/credits/purchase` `POST /api/v1/subscriptions/api-checkout` | API Key |
+| Complexes (Ley 675/2001) | `GET /api/v1/complexes` `GET /api/v1/complexes/{slug}` `GET /api/v1/complexes/{slug}/units` | Free |
+| Schedule visits | `POST /api/v1/visits` | API Key |
+| Upload files | `POST /api/v1/upload` | API Key |
+| Monitoring & usage | `GET /api/v1/monitoring/*` (latency, errors, uptime, usage) | API Key |
 | **c402 monetization** — HTTP 402 Payment Required | `GET /api/v1/credits` `POST /api/v1/credits/purchase` | Free |
 
 ---
@@ -548,6 +556,7 @@ All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (3
 
 ## Support
 
+- **OpenAPI Spec:** `docs/api/openapi.yaml` — 31 endpoints, full request/response schemas, importable into Postman
 - **Interactive Docs:** [xpequi.xyz/developers](https://xpequi.xyz/developers) — Swagger UI playground
 - **AI Agents Guide:** [xpequi.xyz/developers/agents](https://xpequi.xyz/developers/agents) — MCP setup & best practices
 - **Developer Portal:** [xpequi.xyz/developers](https://xpequi.xyz/developers) — API keys, usage, monitoring

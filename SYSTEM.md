@@ -1,6 +1,6 @@
 # Pequi API — System Architecture
 
-> **Version:** 0.3.2 | **Updated:** 2026-05-15
+> **Version:** 0.3.2 | **Updated:** 2026-05-17
 > **Purpose:** Full system context for contributors, AI agents, and advanced integrators.
 
 ---

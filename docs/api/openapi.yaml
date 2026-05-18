@@ -1,77 +1,129 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
-  title: Pequi API
+  title: Pequi API — Colombia Real Estate API
   description: |
-    Colombia's first real estate data API.
-    Search properties, get neighborhood data, price benchmarks, geocode addresses,
-    generate Ley 820 contracts, create payments, and manage residential complexes.
+    La primera API pública de datos inmobiliarios de Colombia.
+    Propiedades, barrios, precios de referencia, contratos Ley 820, pagos Wompi,
+    geocodificación, verificación bancaria Prometeo (Open Finance Decreto 0368),
+    UVR/IPC Banco de la República, tasas hipotecarias Superfinanciera, y valuación
+    automatizada (AVM) para Ibagué y Bogotá.
+
+    ## Authentication
+    Las rutas GET públicas no requieren autenticación.
+    Para rutas protegidas, incluye el header:
+    ```
+    Authorization: Bearer pk_live_<tu_api_key>
+    ```
+    Genera tu API key en https://xpequi.xyz/user/api-keys
+
+    ## Rate Limits
+    | Tier   | RPM  | Daily |
+    |--------|------|-------|
+    | FREE   | 30   | 150   |
+    | AGENTE | 100  | 1,000 |
+    | CONJUNTO | 300 | 5,000 |
+    | ENTERPRISE | 1,000 | 999,999 |
+
+    ## Prepaid Credits (c402)
+    Si excedes tu cuota FREE, puedes usar créditos prepago.
+    Compra paquetes desde $2,500 COP vía PSE/Nequi.
 
     [Developer Portal](https://xpequi.xyz/developers)
     [AI Agents Guide](https://xpequi.xyz/developers/agents)
     [Structured Error Reference](https://xpequi.xyz/developers/guides#errores)
     [Precios y Planes](https://xpequi.xyz/precios)
     [Open Finance Decreto 0368](https://xpequi.xyz/blog/open-finance-decreto-0368)
-  version: "1.1.0"
   contact:
-    name: Pequi
+    name: Pequi Team
     url: https://xpequi.xyz
+  version: 1.16.0
+
 servers:
   - url: https://xpequi.xyz/api/v1
-    description: Production server
+    description: Production API v1
+  - url: https://xpequi.xyz
+    description: Production API (root)
+
+tags:
+  - name: Properties
+    description: Property listings, search, and benchmarks
+  - name: Neighborhoods
+    description: Barrios and UPZ data for Ibagué and Bogotá
+  - name: Valuation
+    description: AVM (Automated Valuation Model) and price benchmarks
+  - name: Geocoding
+    description: Address to coordinates
+  - name: Contracts
+    description: Lease contracts under Ley 820/2003
+  - name: Payments
+    description: Wompi payment processing
+  - name: Fintech
+    description: Open Finance — bank verification, UVR, IPC, mortgage rates
+  - name: Complexes
+    description: Conjuntos residenciales (Ley 675/2001)
+  - name: Monitoring
+    description: API monitoring and usage metrics
+  - name: AI
+    description: AI chat and tools
+  - name: Credits
+    description: Prepaid credit system (c402)
+  - name: Blog
+    description: Blog sharing rewards
 
 paths:
+  # ── Properties ──
   /properties:
     get:
-      operationId: searchProperties
-      summary: Search properties
-      description: Search and filter real estate properties in Colombia
       tags: [Properties]
+      summary: Buscar propiedades
+      description: |
+        Lista propiedades con filtros por ciudad, tipo, precio, barrio, etc.
+        No requiere API key para consultas GET.
+      operationId: listProperties
       parameters:
         - name: city
           in: query
-          schema: { type: string, default: ibague }
-          description: City name
+          schema: { type: string, enum: [ibague, bogota], default: ibague }
+          description: Ciudad
         - name: tipo
           in: query
-          schema: { type: string, enum: [apartamento, casa, local, lote] }
-          description: Property type
-        - name: barrio
-          in: query
-          schema: { type: string }
-          description: Neighborhood name
-        - name: estrato
-          in: query
-          schema: { type: integer, minimum: 1, maximum: 6 }
-          description: Socioeconomic stratum
-        - name: precio_min
-          in: query
-          schema: { type: number }
-          description: Minimum price in COP
-        - name: precio_max
-          in: query
-          schema: { type: number }
-          description: Maximum price in COP
-        - name: cuartos
-          in: query
-          schema: { type: integer }
-          description: Minimum bedrooms
-        - name: banos
-          in: query
-          schema: { type: integer }
-          description: Minimum bathrooms
+          schema: { type: string, enum: [APARTMENT, HOUSE, COMMERCIAL, LAND, FARM, ROOM] }
+          description: Tipo de propiedad
         - name: operacion
           in: query
           schema: { type: string, enum: [venta, arriendo] }
-          description: Listing operation type
+          description: Tipo de operación
+        - name: barrio
+          in: query
+          schema: { type: string }
+          description: Barrio (búsqueda parcial, insensitive)
+        - name: precio_min
+          in: query
+          schema: { type: number }
+          description: Precio mínimo COP
+        - name: precio_max
+          in: query
+          schema: { type: number }
+          description: Precio máximo COP
+        - name: cuartos
+          in: query
+          schema: { type: integer, minimum: 0 }
+          description: Mínimo número de cuartos
+        - name: banos
+          in: query
+          schema: { type: integer, minimum: 0 }
+          description: Mínimo número de baños
         - name: limit
           in: query
           schema: { type: integer, default: 20, maximum: 100 }
+          description: Resultados por página
         - name: page
           in: query
           schema: { type: integer, default: 1 }
+          description: Número de página
       responses:
-        "200":
-          description: List of properties
+        '200':
+          description: Lista de propiedades
           content:
             application/json:
               schema:
@@ -80,23 +132,31 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Property"
+                      $ref: '#/components/schemas/PropertySummary'
                   meta:
-                    $ref: "#/components/schemas/Meta"
+                    $ref: '#/components/schemas/PaginationMeta'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
+  # ── Neighborhoods ──
   /barrios:
     get:
-      operationId: getBarrios
-      summary: List neighborhoods
-      description: Get all neighborhoods for a city with estratos and coordinates
       tags: [Neighborhoods]
+      summary: Listar barrios
+      description: |
+        Lista todos los barrios de una ciudad con estrato y coordenadas.
+        Ibagué: 64 barrios | Bogotá: 212 barrios en 20 localidades
+      operationId: listBarrios
       parameters:
         - name: city
           in: query
-          schema: { type: string, default: ibague }
+          schema: { type: string, enum: [ibague, bogota], default: ibague }
+          description: Ciudad
       responses:
-        "200":
-          description: List of neighborhoods
+        '200':
+          description: Lista de barrios
           content:
             application/json:
               schema:
@@ -105,26 +165,130 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Barrio"
+                      $ref: '#/components/schemas/Barrio'
                   meta:
-                    $ref: "#/components/schemas/Meta"
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      city: { type: string }
+                      localities: { type: integer }
+                      beta: { type: boolean }
+
+  /bogota/upz:
+    get:
+      tags: [Neighborhoods]
+      summary: UPZ de Bogotá
+      description: 117 UPZ (Unidades de Planeamiento Zonal) con uso de suelo, alturas, TransMilenio
+      operationId: listUpz
+      responses:
+        '200':
+          description: Lista de UPZ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Upz'
+
+  /bogota/cadastral:
+    get:
+      tags: [Neighborhoods]
+      summary: Avalúo catastral Bogotá
+      description: Valores de avalúo catastral IGAC por localidad y estrato
+      operationId: getCadastral
+      responses:
+        '200':
+          description: Avalúos catastrales
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CadastralValuation'
+
+  # ── Valuation ──
+  /avm:
+    post:
+      tags: [Valuation]
+      summary: Valuación automatizada (AVM)
+      description: |
+        Calcula el valor estimado de una propiedad usando modelo heurístico
+        basado en área, estrato, tipo y ajustes. Incluye comparables de la DB.
+      operationId: estimatePropertyValue
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvmRequest'
+      responses:
+        '200':
+          description: Valor estimado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AvmResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /avm/bulk:
+    post:
+      tags: [Valuation]
+      summary: AVM masivo
+      description: Valuación de múltiples propiedades en una sola llamada
+      operationId: bulkAvm
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                properties:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AvmRequest'
+      responses:
+        '200':
+          description: Valuaciones masivas
 
   /benchmarks:
     get:
+      tags: [Valuation]
+      summary: Precios de referencia
+      description: Precio por m² de mercado por barrio, tipo y estrato
       operationId: getBenchmarks
-      summary: Price benchmarks
-      description: Get average price per m² by barrio, property type, and estrato
-      tags: [Benchmarks]
       parameters:
         - name: barrio
           in: query
           schema: { type: string }
+          description: Barrio
         - name: tipo
           in: query
-          schema: { type: string }
+          schema: { type: string, enum: [apartamento, casa, local, lote] }
+          description: Tipo de propiedad
+        - name: city
+          in: query
+          schema: { type: string, enum: [ibague, bogota] }
+          description: Ciudad
       responses:
-        "200":
-          description: Price benchmarks
+        '200':
+          description: Benchmarks de precios
           content:
             application/json:
               schema:
@@ -133,76 +297,355 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Benchmark"
+                      $ref: '#/components/schemas/Benchmark'
 
+  # ── Geocoding ──
   /geocode:
     get:
-      operationId: geocode
-      summary: Geocode address
-      description: Convert a Colombian address to latitude/longitude coordinates
       tags: [Geocoding]
+      summary: Geocodificar dirección
+      description: Convierte una dirección colombiana en coordenadas (lat/lng) vía Nominatim/OSM
+      operationId: geocode
       parameters:
         - name: address
           in: query
           required: true
           schema: { type: string, minLength: 3 }
+          description: Dirección (ej. "Calle 10 #3-15 Ibagué")
       responses:
-        "200":
-          description: Geocoded coordinates
+        '200':
+          description: Coordenadas
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    $ref: "#/components/schemas/GeocodeResult"
+                    nullable: true
+                    $ref: '#/components/schemas/GeocodeResult'
+                  meta:
+                    type: object
+                    properties:
+                      found: { type: boolean }
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
+  # ── Contracts ──
   /contracts:
-    post:
-      operationId: generateContract
-      summary: Generate a Ley 820 contract
-      description: Generate a legally compliant rental contract under Colombian Ley 820/2003
+    get:
       tags: [Contracts]
+      summary: Listar contratos
+      description: Lista contratos de arrendamiento generados por el usuario
+      operationId: listContracts
       security:
-        - BearerAuth: []
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Lista de contratos
+    post:
+      tags: [Contracts]
+      summary: Generar contrato
+      description: Genera un contrato de arrendamiento Ley 820/2003
+      operationId: createContract
+      security:
+        - ApiKeyAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GenerateContractParams"
+              $ref: '#/components/schemas/ContractRequest'
       responses:
-        "200":
-          description: Generated contract
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: "#/components/schemas/Contract"
-        "400":
-          description: Missing required fields
-        "429":
-          description: Rate limit exceeded
+        '200':
+          description: Contrato generado
 
+  /contracts/{id}:
+    get:
+      tags: [Contracts]
+      summary: Detalle de contrato
+      operationId: getContract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Detalle del contrato
+
+  # ── Payments ──
   /payments:
     post:
-      operationId: createPayment
-      summary: Create payment
-      description: Create a payment intent and get a Wompi checkout URL
       tags: [Payments]
+      summary: Crear pago
+      description: Crea un pago Wompi para suscripciones API
+      operationId: createPayment
       security:
-        - BearerAuth: []
+        - ApiKeyAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreatePaymentParams"
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  description: Monto en COP
+                concept:
+                  type: string
+                  enum: [subscription, credits]
+                plan:
+                  type: string
       responses:
-        "200":
-          description: Payment created with redirect URL
+        '200':
+          description: Pago creado
+
+  /payments/{id}:
+    get:
+      tags: [Payments]
+      summary: Estado del pago
+      description: Consulta el estado de un pago Wompi
+      operationId: getPaymentStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Estado del pago
+
+  # ── Fintech ──
+  /bank-verification:
+    post:
+      tags: [Fintech]
+      summary: Verificar cuenta bancaria
+      description: |
+        Verifica una cuenta bancaria colombiana vía Prometeo (Open Finance).
+        Compatible con Bancolombia, Davivienda, Nequi, etc.
+      operationId: verifyBankAccount
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankVerificationRequest'
+      responses:
+        '200':
+          description: Resultado de verificación
+
+  /uvr:
+    get:
+      tags: [Fintech]
+      summary: UVR actual
+      description: |
+        Unidad de Valor Real — indicador diario del Banco de la República.
+        Usado para ajustes de canon de arrendamiento según Ley 820/2003.
+      operationId: getCurrentUVR
+      responses:
+        '200':
+          description: UVR actual
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UvrResponse'
+
+  /ipc:
+    get:
+      tags: [Fintech]
+      summary: IPC anual
+      description: Inflación anual (IPC) del Banco de la República para incrementos de canon
+      operationId: getAnnualIPC
+      responses:
+        '200':
+          description: IPC anual
+
+  /rent-increase:
+    post:
+      tags: [Fintech]
+      summary: Calcular incremento de arriendo
+      description: |
+        Calcula el incremento legal máximo de canon según IPC + Ley 820/2003.
+      operationId: calculateRentIncrease
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentRent:
+                  type: number
+                  description: Canon actual en COP
+                monthsSinceLastIncrease:
+                  type: integer
+                  default: 12
+      responses:
+        '200':
+          description: Incremento calculado
+
+  /mortgage-rates:
+    get:
+      tags: [Fintech]
+      summary: Tasas hipotecarias
+      description: |
+        34 productos hipotecarios de 10 bancos colombianos.
+        Datos de la Superintendencia Financiera.
+      operationId: getMortgageRates
+      parameters:
+        - name: bank
+          in: query
+          schema: { type: string }
+          description: Nombre del banco
+        - name: product
+          in: query
+          schema: { type: string, enum: [vivienda_nueva, vivienda_usada, vis, remodelacion, lote, leasing] }
+          description: Tipo de producto
+        - name: amount
+          in: query
+          schema: { type: integer }
+          description: Monto del préstamo para calculadora de cuota
+        - name: term
+          in: query
+          schema: { type: integer }
+          description: Plazo en años para calculadora de cuota
+      responses:
+        '200':
+          description: Tasas hipotecarias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MortgageRate'
+                  meta:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      lowestVis: { type: object, nullable: true }
+                      marketSummary: { type: object, nullable: true }
+                      paymentCalculator: { type: object, nullable: true }
+
+  # ── Complexes ──
+  /complexes:
+    get:
+      tags: [Complexes]
+      summary: Listar conjuntos
+      description: Lista conjuntos residenciales (Ley 675/2001)
+      operationId: listComplexes
+      responses:
+        '200':
+          description: Lista de conjuntos
+
+  /complexes/{slug}:
+    get:
+      tags: [Complexes]
+      summary: Detalle del conjunto
+      operationId: getComplex
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Detalle del conjunto
+
+  /complexes/{slug}/units:
+    get:
+      tags: [Complexes]
+      summary: Unidades del conjunto
+      operationId: getComplexUnits
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Unidades disponibles
+
+  # ── AI ──
+  /chat:
+    post:
+      tags: [AI]
+      summary: Chat con IA inmobiliaria
+      description: |
+        Chat con agente IA especializado en bienes raíces colombianos.
+        Usa DeepSeek V4 Flash via OpenRouter con fallback chain.
+        Conocimiento de Ibagué (64 barrios) y Bogotá (212 barrios, 117 UPZ).
+      operationId: aiChat
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Mensaje del usuario
+                conversationId:
+                  type: string
+                  description: ID de conversación existente (opcional)
+                city:
+                  type: string
+                  enum: [ibague, bogota]
+                  description: Ciudad de contexto
+      responses:
+        '200':
+          description: Respuesta del asistente
+
+  /upload:
+    post:
+      tags: [AI]
+      summary: Subir archivo
+      description: Sube archivos (PDF, imágenes) máximo 5MB
+      operationId: uploadFile
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo (PDF, JPG, PNG, max 5MB)
+      responses:
+        '200':
+          description: Archivo subido
+
+  # ── Credits ──
+  /credits:
+    get:
+      tags: [Credits]
+      summary: Saldo de créditos
+      description: Consulta el saldo de créditos prepago y paquetes disponibles
+      operationId: getCreditBalance
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Saldo y paquetes
           content:
             application/json:
               schema:
@@ -211,72 +654,24 @@ paths:
                   data:
                     type: object
                     properties:
-                      id: { type: string }
-                      redirectUrl: { type: string }
+                      balance: { type: integer }
+                      tier: { type: string }
+                      packs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            calls: { type: integer }
+                            priceCOP: { type: integer }
 
-  /payments/{id}:
-    get:
-      operationId: getPaymentStatus
-      summary: Get payment status
-      description: Check the status of a payment by ID
-      tags: [Payments]
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: Payment status
-
-  /complexes:
-    get:
-      operationId: listComplexes
-      summary: List complexes
-      description: Get all residential complexes (conjuntos)
-      tags: [Complexes]
-      security:
-        - BearerAuth: []
-      responses:
-        "200":
-          description: List of complexes
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Complex"
-
-  /complexes/{slug}:
-    get:
-      operationId: getComplex
-      summary: Get complex detail
-      description: Get a single residential complex by slug
-      tags: [Complexes]
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: slug
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: Complex detail
-
-  /avm:
+  /credits/purchase:
     post:
-      operationId: estimateValue
-      summary: Automated Valuation Model
-      description: Estimate a property's market value using heuristic rules (upgradeable to XGBoost)
-      tags: [AVM]
+      tags: [Credits]
+      summary: Comprar créditos
+      description: Compra créditos prepago via Wompi (PSE/Nequi)
+      operationId: purchaseCredits
       security:
-        - BearerAuth: []
+        - ApiKeyAuth: []
       requestBody:
         required: true
         content:
@@ -284,61 +679,166 @@ paths:
             schema:
               type: object
               properties:
-                area: { type: number, description: "Property area in m²" }
-                bedrooms: { type: integer }
-                bathrooms: { type: integer }
-                propertyType: { type: string, enum: [APARTMENT, HOUSE, COMMERCIAL, LAND, FARM, ROOM] }
-                barrio: { type: string }
-                city: { type: string, default: ibague }
+                packId:
+                  type: string
+                  description: ID del paquete (50, 200, 500, o 1500 calls)
       responses:
-        "200":
-          description: Valuation result with confidence range and feature contributions
+        '200':
+          description: URL de pago Wompi
 
-  /complexes/{slug}/units:
-    get:
-      operationId: getComplexUnits
-      summary: List complex units
-      description: Get all units/building units in a complex
-      tags: [Complexes]
+  /subscriptions/api-checkout:
+    post:
+      tags: [Credits]
+      summary: Comprar suscripción API
+      description: Suscripción mensual AGENTE ($30K/mes) o CONJUNTO ($150K/mes)
+      operationId: purchaseSubscription
       security:
-        - BearerAuth: []
-      parameters:
-        - name: slug
-          in: path
-          required: true
-          schema: { type: string }
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tier:
+                  type: string
+                  enum: [AGENTE, CONJUNTO]
+                  description: Tier de suscripción
       responses:
-        "200":
-          description: List of units
+        '200':
+          description: URL de pago Wompi
+
+  # ── Monitoring ──
+  /monitoring/latency:
+    get:
+      tags: [Monitoring]
+      summary: Latencia de la API
+      description: Latencia P50/P95/P99 por endpoint
+      operationId: getLatency
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Métricas de latencia
+
+  /monitoring/errors:
+    get:
+      tags: [Monitoring]
+      summary: Errores de la API
+      description: Desglose de errores 4xx/5xx por endpoint
+      operationId: getErrors
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Métricas de errores
+
+  /monitoring/uptime:
+    get:
+      tags: [Monitoring]
+      summary: Disponibilidad
+      description: Estadísticas de uptime por endpoint
+      operationId: getUptime
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Métricas de uptime
+
+  /monitoring/usage:
+    get:
+      tags: [Monitoring]
+      summary: Uso actual
+      description: Llamadas por hora, créditos restantes, tier activo
+      operationId: getUsage
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Uso actual de la API
+
+  # ── Visits ──
+  /visits:
+    post:
+      tags: [Properties]
+      summary: Agendar visita
+      description: Agenda una visita a una propiedad
+      operationId: scheduleVisit
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                propertyId:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                time:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Visita agendada
+
+  # ── Blog ──
+  /blog-share/claim:
+    post:
+      tags: [Blog]
+      summary: Reclamar créditos por compartir
+      description: Reclama créditos gratis por compartir artículos del blog en redes sociales
+      operationId: claimShareReward
+      responses:
+        '200':
+          description: Créditos reclamados
+
+  /blog-share/stats:
+    get:
+      tags: [Blog]
+      summary: Estadísticas de recompensas
+      description: Estadísticas de recompensas obtenidas por compartir artículos
+      operationId: getShareStats
+      responses:
+        '200':
+          description: Estadísticas
 
 components:
   securitySchemes:
-    BearerAuth:
+    ApiKeyAuth:
       type: http
       scheme: bearer
-      bearerFormat: api-key
+      bearerFormat: pk_live_xxx
       description: |
-        API key obtained from the developer dashboard.
-        Use `pk_live_` prefixed keys.
-        FREE tier: 30 req/min. Upgrade at /precios.
+        API key generada en https://xpequi.xyz/user/api-keys
+        Formato: `pk_live_<32 caracteres hex>`
 
   schemas:
-    Property:
+    PropertySummary:
       type: object
       properties:
         id: { type: string }
-        name: { type: string }
-        address: { type: string }
+        name: { type: string, nullable: true }
+        address: { type: string, nullable: true }
         city: { type: string }
-        propertyType: { type: string }
+        department: { type: string, nullable: true }
+        propertyType: { type: string, enum: [APARTMENT, HOUSE, COMMERCIAL, LAND, FARM, ROOM] }
         listingType: { type: string, enum: [SALE, RENT] }
-        bedrooms: { type: integer }
-        bathrooms: { type: integer }
-        area: { type: number }
-        salePrice: { type: number, nullable: true }
+        bedrooms: { type: integer, nullable: true }
+        bathrooms: { type: integer, nullable: true }
+        area: { type: number, nullable: true }
         monthlyRent: { type: number, nullable: true }
+        salePrice: { type: number, nullable: true }
         description: { type: string, nullable: true }
-        images: { type: array, items: { type: string } }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        images: { type: array, items: { type: string, format: uri } }
+        estrato: { type: integer, nullable: true }
         createdAt: { type: string, format: date-time }
 
     Barrio:
@@ -347,17 +847,91 @@ components:
         id: { type: string }
         name: { type: string }
         estrato: { type: integer }
-        coordinates: { type: object, properties: { lat: { type: number }, lng: { type: number } }, nullable: true }
-        location: { type: string }
+        coordinates: { type: object, nullable: true }
+        location: { type: string, nullable: true }
         description: { type: string }
+        locality: { type: string, nullable: true }
+        upz: { type: string, nullable: true }
+
+    Upz:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        locality: { type: string }
+        landUse: { type: string }
+        maxHeight: { type: integer }
+        hasTransMilenio: { type: boolean }
+
+    CadastralValuation:
+      type: object
+      properties:
+        locality: { type: string }
+        estrato: { type: integer }
+        valorPorM2: { type: number }
+        source: { type: string }
+
+    AvmRequest:
+      type: object
+      required: [area, bedrooms, bathrooms, propertyType, barrio, city]
+      properties:
+        area: { type: number, description: "Área en m²", example: 70 }
+        bedrooms: { type: integer, description: "Número de cuartos", example: 3 }
+        bathrooms: { type: integer, description: "Número de baños", example: 2 }
+        propertyType:
+          type: string
+          enum: [APARTMENT, HOUSE, COMMERCIAL, LAND, FARM, ROOM]
+          description: Tipo de propiedad
+        barrio: { type: string, description: "Barrio", example: "Centro" }
+        city: { type: string, description: "Ciudad", example: "ibague" }
+        lat: { type: number, description: "Latitud (opcional)" }
+        lng: { type: number, description: "Longitud (opcional)" }
+
+    AvmResponse:
+      type: object
+      properties:
+        estimatedValue: { type: integer }
+        confidenceRange:
+          type: object
+          properties:
+            low: { type: integer }
+            high: { type: integer }
+        uncertainty:
+          type: object
+          properties:
+            p10: { type: integer }
+            p90: { type: integer }
+        pricePerM2: { type: integer }
+        featureContributions: { type: object }
+        comparableProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComparableProperty'
+        modelVersion: { type: string }
+        modelMode: { type: string, enum: [heuristic] }
+        coverageStatement: { type: string }
+        generatedAt: { type: string, format: date-time }
+
+    ComparableProperty:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        price: { type: number }
+        area: { type: number }
+        distance_km: { type: number, nullable: true }
 
     Benchmark:
       type: object
       properties:
         tipo: { type: string }
-        precioPromedioM2: { type: number }
+        precioPromedioM2: { type: integer }
         muestras: { type: integer }
         source: { type: string }
+        barrio: { type: string, nullable: true }
+        estrato: { type: integer, nullable: true }
+        precioMinM2: { type: integer, nullable: true }
+        precioMaxM2: { type: integer, nullable: true }
 
     GeocodeResult:
       type: object
@@ -365,67 +939,92 @@ components:
         lat: { type: number }
         lng: { type: number }
         displayName: { type: string }
+        osmType: { type: string }
 
-    GenerateContractParams:
+    ContractRequest:
       type: object
-      required:
-        - landlordName
-        - landlordCedula
-        - tenantName
-        - tenantCedula
-        - propertyAddress
-        - rentAmount
-        - startDate
-        - endDate
+      required: [landlordName, tenantName, propertyAddress, monthlyRent, startDate]
       properties:
-        landlordName: { type: string, description: "Full name of the landlord/propietario" }
-        landlordCedula: { type: string, description: "Colombian ID (cédula) of the landlord" }
-        tenantName: { type: string, description: "Full name of the tenant/arrendatario" }
-        tenantCedula: { type: string, description: "Colombian ID of the tenant" }
+        landlordName: { type: string }
+        tenantName: { type: string }
         propertyAddress: { type: string }
-        propertyMatricula: { type: string, description: "Property registration number (optional)" }
-        rentAmount: { type: number, description: "Monthly rent in COP" }
-        currency: { type: string, default: "COP" }
+        monthlyRent: { type: number }
         startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
-        paymentDueDate: { type: integer, default: 5, description: "Day of month rent is due" }
-        utilityDeposit: { type: number, description: "Utility deposit (caucion de servicios), NOT security deposit (Ley 820)" }
+        durationMonths: { type: integer, default: 12 }
+        depositAmount: { type: number }
         additionalClauses: { type: string }
 
-    CreatePaymentParams:
+    BankVerificationRequest:
       type: object
-      required:
-        - userId
-        - amount
+      required: [accountType, accountNumber, bankCode, documentNumber]
       properties:
-        userId: { type: string }
-        propertyId: { type: string }
-        tenancyId: { type: string }
-        amount: { type: number }
-        paymentType: { type: string, default: "RENT" }
-        email: { type: string }
-        name: { type: string }
-        method: { type: string, enum: [card, transfer, nequi, daviplata, cash] }
+        accountType: { type: string, enum: [ahorros, corriente] }
+        accountNumber: { type: string }
+        bankCode: { type: string }
+        documentNumber: { type: string }
+        documentType: { type: string, enum: [CC, NIT, CE, PP], default: CC }
 
-    Complex:
+    UvrResponse:
       type: object
       properties:
-        id: { type: string }
-        name: { type: string }
-        slug: { type: string }
-        description: { type: string }
-        address: { type: string }
-        city: { type: string }
-        amenities: { type: array, items: { type: string } }
-        totalUnits: { type: integer }
-        availableUnits: { type: integer }
-        images: { type: array, items: { type: string } }
-        createdAt: { type: string, format: date-time }
+        value: { type: number, description: "Valor UVR del día", example: 396.54 }
+        date: { type: string, format: date }
+        variation: { type: number, description: "Variación anual acumulada (%)" }
+        source: { type: string, enum: [banrep-mcp-live, banrep-api-cached, default-uvr] }
 
-    Meta:
+    MortgageRate:
+      type: object
+      properties:
+        banco: { type: string }
+        tipoProducto:
+          type: string
+          enum: [vivienda_nueva, vivienda_usada, vis, remodelacion, lote, leasing]
+        tea: { type: number, description: "Tasa Efectiva Anual (%)" }
+        descripcion: { type: string }
+        uvr: { type: boolean }
+
+    PaginationMeta:
       type: object
       properties:
         total: { type: integer }
         page: { type: integer }
         limit: { type: integer }
         cached: { type: boolean }
+
+    ApiError:
+      type: object
+      properties:
+        error: { type: string }
+        details: { type: object }
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Unauthorized:
+      description: No autenticado — API key inválida o faltante
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    RateLimited:
+      description: Límite de tasa excedido o créditos insuficientes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    InternalError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'

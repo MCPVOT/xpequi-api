@@ -4,6 +4,13 @@ All notable changes to the Pequi API platform will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+- Complete OpenAPI 3.0.3 spec (`docs/api/openapi.yaml`) — 31 v1 endpoints with
+  full request/response schemas, 12 component schemas, auth & rate limit docs
+- Endpoint count corrected: 18 → 31 in README and badges
+
 ## [0.3.2] — 2026-05-15
 
 ### Added
