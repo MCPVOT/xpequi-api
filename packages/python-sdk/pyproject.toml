@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pequi-api-client"
-version = "0.1.0"
+version = "0.3.1"
 description = "Official Python SDK for the Pequi API — Colombian real estate data for developers"
 readme = "README.md"
 authors = [{ name = "MCPVOT", email = "dev@xpequi.xyz" }]
