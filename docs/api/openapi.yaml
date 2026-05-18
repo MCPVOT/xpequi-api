@@ -197,8 +197,18 @@ paths:
     get:
       tags: [Neighborhoods]
       summary: Avalúo catastral Bogotá
-      description: Valores de avalúo catastral IGAC por localidad y estrato
+      description: Valores de avalúo catastral IGAC por localidad y estrato. Requiere parámetro localidad.
       operationId: getCadastral
+      parameters:
+        - name: localidad
+          in: query
+          required: true
+          schema: { type: string }
+          description: Localidad de Bogotá (ej. Usaquen, Chapinero, Suba)
+        - name: estrato
+          in: query
+          schema: { type: integer, enum: [1, 2, 3, 4, 5, 6] }
+          description: Filtrar por estrato (opcional)
       responses:
         '200':
           description: Avalúos catastrales
