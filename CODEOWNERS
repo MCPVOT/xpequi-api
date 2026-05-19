@@ -1,0 +1,14 @@
+# Pequi API — Code Owners
+# @MCPVOT maintains this repo
+
+* @MCPVOT/pequi-maintainers
+
+# SDK packages
+packages/api-client/ @MCPVOT/pequi-maintainers
+packages/mcp-server/ @MCPVOT/pequi-maintainers
+packages/python-sdk/ @MCPVOT/pequi-maintainers
+
+# Docs
+docs/ @MCPVOT/pequi-maintainers
+README.md @MCPVOT/pequi-maintainers
+SECURITY.md @MCPVOT/pequi-maintainers

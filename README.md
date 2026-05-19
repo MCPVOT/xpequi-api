@@ -115,7 +115,7 @@ const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
 | **TypeScript SDK** | `npm install @MCPVOT/api-client` | 31 methods · full type safety · every endpoint | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
 | **Python SDK** | `pip install pequi-api-client` | 16 sub-APIs · fluent interface · zero deps | <img src="https://img.shields.io/badge/PyPI-3776ab?style=flat-square&labelColor=0d1117" /> |
 | **MCP Server** | `npx -y @MCPVOT/mcp-server` | Claude Desktop · Cursor · Copilot · Smithery | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
-| **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway for Pequi API | <img src="https://img.shields.io/badge/Plugin-ff7700?style=flat-square&labelColor=0d1117" /> |
+| **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway (archived — OpenClaw removed from stack May 2026) | <img src="https://img.shields.io/badge/Archived-888?style=flat-square&labelColor=0d1117" /> |
 | **Ollama Tool** | `packages/ollama-tool/` | Local LLM property search via Ollama | <img src="https://img.shields.io/badge/Tool-00e5ff?style=flat-square&labelColor=0d1117" /> |
 
 > **⚠️ Package availability:** npm packages pending publication on public registry due to GitHub billing limits. The API is fully functional via REST endpoints without an SDK. Browse packages at [GitHub Packages →](https://github.com/MCPVOT/xpequi-api/packages) or use the curl examples throughout this doc.

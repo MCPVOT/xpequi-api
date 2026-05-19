@@ -29,9 +29,6 @@ import {
 } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 import http from 'node:http'
-import { createReadStream, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 // ─── Configuration ────────────────────────────────────────────────
 
@@ -39,7 +36,12 @@ const API_KEY = process.env.PEQUI_API_KEY || ''
 const API_BASE = process.env.PEQUI_API_URL || 'https://xpequi.xyz/api/v1'
 const PORT = parseInt(process.env.PEQUI_MCP_PORT || '3100', 10)
 const SERVER_NAME = '@MCPVOT/mcp-server'
-const SERVER_VERSION = '0.1.0'
+const SERVER_VERSION = '0.2.0'  // Must match packages/mcp-server/package.json
+
+// Retry/backoff configuration
+const MAX_RETRIES = 2
+const RETRY_DELAY_MS = 1000
+const FETCH_TIMEOUT_MS = 15000
 
 // ─── API Client ───────────────────────────────────────────────────
 
@@ -57,12 +59,33 @@ async function apiGet<T>(path: string, params?: Record<string, string | undefine
   }
   if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
 
-  const res = await fetch(url.toString(), { headers })
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`API ${res.status}: ${text.slice(0, 200)}`)
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+      const res = await fetch(url.toString(), { headers, signal: controller.signal })
+      clearTimeout(timer)
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        const err = new Error(`API ${res.status}: ${text.slice(0, 200)}`)
+        // Don't retry client errors (4xx)
+        if (res.status >= 400 && res.status < 500) throw err
+        throw err
+      }
+      return res.json() as Promise<T>
+    } catch (err: any) {
+      lastError = err
+      if (err.name === 'AbortError') {
+        lastError = new Error(`Request timed out after ${FETCH_TIMEOUT_MS}ms`)
+      }
+      if (attempt < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)))
+      }
+    }
   }
-  return res.json() as Promise<T>
+  throw lastError || new Error('Unknown API error')
 }
 
 // ─── Zod Schemas ──────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-name: CI
+name: CI — Typecheck + Build + OpenAPI Validation
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22'
           cache: 'npm'
       - run: npm ci
       - run: npx tsc --noEmit
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22'
           cache: 'npm'
       - run: npm ci
       - run: cd packages/api-client && npm run build
@@ -39,3 +39,29 @@ jobs:
         with:
           python-version: '3.11'
       - run: cd packages/python-sdk && pip install build && python -m build
+
+  openapi-validate:
+    needs: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate OpenAPI spec
+        run: |
+          if [ -f "docs/api/openapi.yaml" ]; then
+            npx --yes @redocly/cli lint docs/api/openapi.yaml --format=stylish
+          else
+            echo "No OpenAPI spec found — skipping"
+          fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hardcoded secret check
+        run: |
+          grep -rn 'sk-[a-zA-Z0-9]\{20,\}' --include="*.ts" --include="*.tsx" --include="*.py" --exclude-dir=node_modules . 2>/dev/null && echo "WARNING: Hardcoded secret found" || echo "No hardcoded secrets"
+      - name: Semgrep scan
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: auto
