@@ -3,16 +3,16 @@
   "agent": {
     "general": {
       "mode": "subagent",
-      "model": "zai-coding-plan/glm-5.1"
+      "model": "deepseek/deepseek-v4-flash"
     },
     "explore": {
       "mode": "subagent",
-      "model": "zai-coding-plan/glm-4.7-flash"
+      "model": "deepseek/deepseek-v4-flash"
     },
     "xpequi-api-agent": {
       "description": "Specialized agent for the xpequi-api SDK + MCP server public repo",
       "mode": "subagent",
-      "model": "zai-coding-plan/glm-5.1",
+      "model": "deepseek/deepseek-v4-flash",
       "prompt": "{file:.opencode/agents/xpequi-api-agent.md}",
       "temperature": 0.1,
       "hidden": true,
