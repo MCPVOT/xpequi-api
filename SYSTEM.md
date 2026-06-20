@@ -355,6 +355,38 @@ Fallback: In-memory Map if Redis unavailable (same-instance only)
 
 ---
 
+
+## 9. Distribution & IPFS Security
+
+### Multi-Channel Publishing
+
+Pequi API publishes to 5 channels for zero single-point-of-failure:
+
+| Channel | Command | Security |
+|---------|---------|----------|
+| npmjs.com | npm publish | Public registry, no org needed |
+| JSR (jsr.io) | npx jsr publish | Open-source backup registry |
+| Docker (GHCR) | docker push | Containerized distribution |
+| IPFS | ipfs add + pin | Decentralized, no registry dependency |
+| GitHub Releases | git tag + push | Last-resort fallback |
+
+### IPFS Security Audit
+
+The droplet runs an IPFS daemon (kubo 0.32.0) for contract CID pinning.
+Security posture:
+
+| Port | Bind | UFW | Risk |
+|------|------|-----|------|
+| 4001 (swarm) | 0.0.0.0 | Blocked | Low - libp2p relay hides real IP |
+| 5001 (API) | 127.0.0.1 | Blocked | None - localhost only |
+| 8080 (gateway) | 127.0.0.1 | Blocked | None - localhost only |
+
+**Verdict:** Using IPFS from the droplet for MCP distribution is SAFE.
+- The droplet never serves HTTP traffic for IPFS directly
+- Users access pinned content via public IPFS gateways (ipfs.io, cloudflare-ipfs.com)
+- The droplet real IP (161.35.6.94) does not appear in IPFS peer addresses
+- All admin ports are localhost-only + UFW-blocked externally
+
 ## 8. Version History
 
 | Version | Date | Key Changes |
