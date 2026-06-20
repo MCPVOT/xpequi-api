@@ -31,7 +31,8 @@
     "build": "npm run build --workspaces",
     "build:client": "npm run build -w packages/api-client",
     "build:mcp": "npm run build -w packages/mcp-server",
-    "start:mcp": "npm run start -w packages/mcp-server"
+    "start:mcp": "npm run start -w packages/mcp-server",
+    "test": "node packages/mcp-server/node_modules/.bin/tsx --test tests/*.test.ts"
   },
   "repository": {
     "type": "git",
