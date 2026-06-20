@@ -118,7 +118,6 @@ const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
 | **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway (archived — OpenClaw removed from stack May 2026) | <img src="https://img.shields.io/badge/Archived-888?style=flat-square&labelColor=0d1117" /> |
 | **Ollama Tool** | `packages/ollama-tool/` | Local LLM property search via Ollama | <img src="https://img.shields.io/badge/Tool-00e5ff?style=flat-square&labelColor=0d1117" /> |
 
-> **⚠️ Package availability:** npm packages pending publication on public registry due to GitHub billing limits. The API is fully functional via REST endpoints without an SDK. Browse packages at [GitHub Packages →](https://github.com/MCPVOT/xpequi-api/packages) or use the curl examples throughout this doc.
 
 ---
 

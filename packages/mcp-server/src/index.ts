@@ -36,7 +36,7 @@ const API_KEY = process.env.PEQUI_API_KEY || ''
 const API_BASE = process.env.PEQUI_API_URL || 'https://xpequi.xyz/api/v1'
 const PORT = parseInt(process.env.PEQUI_MCP_PORT || '3100', 10)
 const SERVER_NAME = '@MCPVOT/mcp-server'
-const SERVER_VERSION = '0.2.0'  // Must match packages/mcp-server/package.json
+const SERVER_VERSION = '0.3.1'  // Must match packages/mcp-server/package.json
 
 // Retry/backoff configuration
 const MAX_RETRIES = 2
