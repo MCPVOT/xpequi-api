@@ -352,6 +352,65 @@ Fallback: In-memory Map if Redis unavailable (same-instance only)
 | `WOMPI_PUBLIC_KEY` | Wompi checkout integration | Yes (for c402) |
 | `WOMPI_EVENTS_SECRET` | Webhook signature verification | Yes (for payments) |
 | `NEXT_PUBLIC_APP_URL` | App URL for redirects | Yes |
+## 8. Loop Engineer — Autonomous Agent System
+
+Published Loop Library: https://signals.forwardfuture.ai/loop-library/ (44 published loops)
+
+### Concept
+Loop Engineering = designing nested agent systems with two layers:
+1. **Inner loop (agent loop)** — helps an agent complete a given task well
+2. **Outer loop (decision loop)** — decides what should happen next, preserves state across sessions, shares information between loops, monitors outcomes, improves over time
+
+Loops **compound** by reading/writing shared artifacts across domains.
+### Deployed Cron Jobs (Hermes Agent on Droplet)
+| Job | Schedule | Skills | Workdir |
+| support-triage | every 1h | support-triage, seo-research, analytics-analysis | /opt/xpequi-api |
+| seo-research | every 1d | seo-research | /opt/xpequi-api |
+| analytics-analysis | every 6h | analytics-analysis | /opt/xpequi-api |
+| security-audit | every 1d | security-audit | /opt/xpequi-api |
+| postgres-analysis | every 12h | postgres-analysis | /opt/xpequi-api |
+| pequi-health-monitor | every 6h | no-agent script | /opt/pequi |
+| pequi-user-cleanup | 0 3 * * * | none | /opt/pequi |
+| pequi-health-monitor | every 6h | no-agent script |
+| pequi-user-cleanup | 0 3 * * * | none |
+### Loop Contracts
+- loops/support/README.md - Support inbox triage
+- loops/seo/README.md - SEO keyword gaps, content tasks
+- loops/product-growth/README.md - Cross-loop signal correlation
+- loops/security/README.md - CVE scan, auth anomaly detection
+- loops/database/README.md - Slow query analysis, index health
+ 
+### Artifact System
+- artifacts/signals/ - Structured observations
+- artifacts/tickets/ - Bug reports / support conversations
+- artifacts/tasks/ - Engineering work items
+- artifacts/docs/ - Durable knowledge
+ 
+### Self-Verifying Loop Architecture
+PLAN (Opus 4.8) EXECUTE (Kimi K2.6 swarm) VERIFY (Opus 4.8) LOOP until clean
+ 
+Test run: 100 EV-market companies, 5 live feeds, 3 verify passes, 0 errors final
+Source: https://github.com/JayZeeDesign/loop-engineer-template
+ 
+### Adopted Published Loops from Library
+| Loop | Number | Schedule |
+|------|--------|----------|
+| Recent-feedback sweep | 031 | every 1h |
+| SEO/GEO visibility loop | 006 | every 1d |
+| Production error sweep | 004 | every 6h |
+| Ticket-to-PR-ready loop | 016 | on-demand |
+| Post-release baseline loop | 015 | after deploy |
+ 
+### Research Docs
+- self-verifying-loop.md - Full architecture doc
+- self-verifying-loop.json - Structured JSON
+- loop-engineer-overview.md - Concept + Pequi application
+- research-report.md - Live research from OpenRouter, GitHub
+- LOGS.md - Cross-domain work log
+ 
+### Key Finding
+Audit discovered 10 unverified users (45 percent of 22 total). June 12 had 6 signups with 0 verified (100 percent drop). SMTP on Vercel, all 7 auth endpoints work. Signal created and resolved.
+
 
 ---
 
@@ -384,10 +443,10 @@ Security posture:
 **Verdict:** Using IPFS from the droplet for MCP distribution is SAFE.
 - The droplet never serves HTTP traffic for IPFS directly
 - Users access pinned content via public IPFS gateways (ipfs.io, cloudflare-ipfs.com)
-- The droplet real IP (161.35.6.94) does not appear in IPFS peer addresses
+- The droplet real IP does not appear in IPFS peer addresses
 - All admin ports are localhost-only + UFW-blocked externally
 
-## 8. Version History
+## 10. Version History
 
 | Version | Date | Key Changes |
 |---------|------|-------------|
