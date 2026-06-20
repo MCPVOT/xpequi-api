@@ -551,7 +551,43 @@ Available inside every major AI assistant and coding agent:
 
 All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
 
+
+
 ---
+
+## Installation (3 Ways)
+
+### 1. npm (recommended)
+```bash
+# SDK
+npm install pequi-api-client
+
+# MCP server (Claude, Cursor, Copilot)
+npx -y pequi-mcp-server
+```
+
+### 2. JSR
+```bash
+npx jsr add @pequi/api-client
+```
+
+### 3. Docker (MCP server)
+```bash
+docker pull ghcr.io/mcpvot/pequi-mcp-server
+docker run -p 3100:3100 ghcr.io/mcpvot/pequi-mcp-server
+```
+
+Or install directly from GitHub without any registry:
+```json
+{
+  "mcpServers": {
+    "pequi": {
+      "command": "npx",
+      "args": ["github:MCPVOT/xpequi-api/packages/mcp-server"]
+    }
+  }
+}
+```
 
 ## Support
 
