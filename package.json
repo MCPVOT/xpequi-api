@@ -3,7 +3,26 @@
   "version": "0.3.1",
   "private": true,
   "description": "Colombia's first real estate data API — search properties, neighborhoods, price benchmarks, geocoding, contracts, payments, and MCP server for AI agents",
-  "keywords": ["colombia", "real-estate", "ibague", "bogota", "propiedades", "inmobiliario", "api", "mcp", "real-estate-api", "colombia-real-estate", "open-finance", "c402", "http-402", "prepaid-credits", "uvr", "ipc", "llama", "open-source"],
+  "keywords": [
+    "colombia",
+    "real-estate",
+    "ibague",
+    "bogota",
+    "propiedades",
+    "inmobiliario",
+    "api",
+    "mcp",
+    "real-estate-api",
+    "colombia-real-estate",
+    "open-finance",
+    "c402",
+    "http-402",
+    "prepaid-credits",
+    "uvr",
+    "ipc",
+    "llama",
+    "open-source"
+  ],
   "workspaces": [
     "packages/api-client",
     "packages/mcp-server"
@@ -20,5 +39,12 @@
   },
   "homepage": "https://xpequi.xyz/developers",
   "bugs": "https://github.com/MCPVOT/xpequi-api/issues",
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "hono": "4.12.26"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.5",
+    "hono": "4.12.26"
+  }
 }
