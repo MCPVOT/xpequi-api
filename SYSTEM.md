@@ -25,7 +25,7 @@ xpequi-api/
 │   │   └── tsconfig.json
 │   │
 │   ├── mcp-server/           # MCP server (@MCPVOT/mcp-server)
-│   │   ├── src/index.ts      # 7 MCP tools
+│   │   ├── src/index.ts      # 10 MCP tools
 │   │   ├── package.json
 │   │   └── examples/         # Usage examples for Claude/Cursor/Copilot
 │   │

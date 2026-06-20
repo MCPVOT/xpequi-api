@@ -514,7 +514,7 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-### Available MCP Tools (7)
+### Available MCP Tools (10)
 
 | Tool | Description |
 |------|-------------|
