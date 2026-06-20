@@ -1,5 +1,5 @@
 {
-  "name": "@MCPVOT/mcp-server",
+  "name": "pequi-mcp-server",
   "version": "0.3.1",
   "description": "MCP server for Pequi \u2014 Colombia's first real estate data API. Search properties, lookup neighborhoods, get price benchmarks, and geocode addresses in Ibagu\u00e9.",
   "author": "Pequi (xpequi.xyz)",

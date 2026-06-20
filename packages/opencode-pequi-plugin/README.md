@@ -1,11 +1,11 @@
-# @MCPVOT/opencode-pequi-plugin
+# pequi-opencode-plugin
 
 OpenCode plugin for Pequi — Colombian real estate data, right inside your coding agent.
 
 ## Installation
 
 ```bash
-opencode plugin install @MCPVOT/opencode-pequi-plugin
+opencode plugin install pequi-opencode-plugin
 ```
 
 Set your API key (optional — FREE tier works without one):

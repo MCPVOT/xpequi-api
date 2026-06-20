@@ -1,5 +1,5 @@
 {
-  "name": "@MCPVOT/api-client",
+  "name": "pequi-api-client",
   "version": "0.3.1",
   "description": "TypeScript client for Pequi \u2014 Colombia's first real estate data API. Search properties, lookup neighborhoods, get price benchmarks, geocode addresses. MCP-compatible.",
   "author": "Pequi (xpequi.xyz)",

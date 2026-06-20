@@ -3,7 +3,7 @@
     "pequi": {
       "name": "Pequi Real Estate API",
       "command": "npx",
-      "args": ["-y", "@MCPVOT/mcp-server"],
+      "args": ["-y", "pequi-mcp-server"],
       "env": {
         "PEQUI_API_KEY": ""
       }

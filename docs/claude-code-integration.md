@@ -11,7 +11,7 @@ Add this to your `claude_desktop_config.json`:
   "mcpServers": {
     "pequi-api": {
       "command": "npx",
-      "args": ["-y", "@MCPVOT/mcp-server"]
+      "args": ["-y", "pequi-mcp-server"]
     }
   }
 }

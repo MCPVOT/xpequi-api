@@ -1,17 +1,17 @@
-# @MCPVOT/api-client
+# pequi-api-client
 
 TypeScript client for Pequi — Colombia's first real estate data API.
 
 ## Install
 
 ```bash
-npm install @MCPVOT/api-client
+npm install pequi-api-client
 ```
 
 ## Quick Start
 
 ```typescript
-import { PequiClient } from '@MCPVOT/api-client'
+import { PequiClient } from 'pequi-api-client'
 
 const client = new PequiClient({ apiKey: 'pk_live_your_key' })
 

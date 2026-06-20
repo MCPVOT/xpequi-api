@@ -1,4 +1,4 @@
-# @MCPVOT/mcp-server
+# pequi-mcp-server
 
 > MCP server for Pequi — Colombia's first real estate data API.
 
@@ -36,7 +36,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "pequi": {
       "command": "npx",
-      "args": ["-y", "@MCPVOT/mcp-server"]
+      "args": ["-y", "pequi-mcp-server"]
     }
   }
 }
@@ -50,7 +50,7 @@ In Cursor Settings → MCP Servers → Add:
 |-------|-------|
 | Name | `pequi` |
 | Type | `command` |
-| Command | `npx -y @MCPVOT/mcp-server` |
+| Command | `npx -y pequi-mcp-server` |
 
 ### VS Code + GitHub Copilot
 
@@ -59,7 +59,7 @@ In Cursor Settings → MCP Servers → Add:
   "github.copilot.chat.mcpServers": {
     "pequi": {
       "command": "npx",
-      "args": ["-y", "@MCPVOT/mcp-server"]
+      "args": ["-y", "pequi-mcp-server"]
     }
   }
 }
@@ -87,13 +87,13 @@ In Cursor Settings → MCP Servers → Add:
 ### With API Key (higher rate limits)
 
 ```bash
-PEQUI_API_KEY=pk_live_xxx npx -y @MCPVOT/mcp-server
+PEQUI_API_KEY=pk_live_xxx npx -y pequi-mcp-server
 ```
 
 ### SSE mode (for custom integrations)
 
 ```bash
-npx -y @MCPVOT/mcp-server --port 3100
+npx -y pequi-mcp-server --port 3100
 ```
 
 Then connect to `http://localhost:3100/mcp`.
@@ -101,9 +101,9 @@ Then connect to `http://localhost:3100/mcp`.
 ### Inspect with MCP Inspector
 
 ```bash
-npx -y @MCPVOT/mcp-server
+npx -y pequi-mcp-server
 # In another terminal:
-npx @modelcontextprotocol/inspector node node_modules/@MCPVOT/mcp-server/dist/index.js
+npx @modelcontextprotocol/inspector node node_modules/pequi-mcp-server/dist/index.js
 ```
 
 ## Data Privacy
@@ -116,7 +116,7 @@ This MCP server only accesses **aggregate, anonymized data** through the Pequi A
 - **API Docs:** https://xpequi.xyz/developers
 - **Blog:** https://xpequi.xyz/blog/open-finance-decreto-0368
 - **GitHub:** https://github.com/MCPVOT/pequi/tree/master/packages/mcp-server
-- **npm:** `@MCPVOT/mcp-server`
+- **npm:** `pequi-mcp-server`
 
 ## License
 

@@ -87,8 +87,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - API key authentication (Bearer → SHA-256 → scope check → tier-based limits)
 - Per-key Redis rate limiting (FREE: 30/min, AGENTE: 100/min, CONJUNTO: 300/min)
 - Usage metering with Redis counters and hourly cron flush to DB
-- TypeScript SDK (`@MCPVOT/api-client` on npm) with 10 initial methods
-- MCP server (`@MCPVOT/mcp-server` on npm) for Claude Desktop, Cursor, VS Code Copilot
+- TypeScript SDK (`pequi-api-client` on npm) with 10 initial methods
+- MCP server (`pequi-mcp-server` on npm) for Claude Desktop, Cursor, VS Code Copilot
 - Developer portal at `xpequi.xyz/developers` with key management, usage charts, code examples
 - OpenAPI 3.0 spec with `operationId` on all endpoints
 - Swagger UI interactive playground

@@ -81,7 +81,7 @@ curl https://xpequi.xyz/api/v1/ipc
 Or use the TypeScript SDK:
 
 ```typescript
-import { PequiClient } from '@MCPVOT/api-client'
+import { PequiClient } from 'pequi-api-client'
 
 const client = new PequiClient()
 const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
@@ -112,9 +112,9 @@ const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
 
 | Package | Install | Description | Status |
 |---------|---------|-------------|--------|
-| **TypeScript SDK** | `npm install @MCPVOT/api-client` | 31 methods · full type safety · every endpoint | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
+| **TypeScript SDK** | `npm install pequi-api-client` | 31 methods · full type safety · every endpoint | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
 | **Python SDK** | `pip install pequi-api-client` | 16 sub-APIs · fluent interface · zero deps | <img src="https://img.shields.io/badge/PyPI-3776ab?style=flat-square&labelColor=0d1117" /> |
-| **MCP Server** | `npx -y @MCPVOT/mcp-server` | Claude Desktop · Cursor · Copilot · Smithery | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
+| **MCP Server** | `npx -y pequi-mcp-server` | Claude Desktop · Cursor · Copilot · Smithery | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
 | **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway (archived — OpenClaw removed from stack May 2026) | <img src="https://img.shields.io/badge/Archived-888?style=flat-square&labelColor=0d1117" /> |
 | **Ollama Tool** | `packages/ollama-tool/` | Local LLM property search via Ollama | <img src="https://img.shields.io/badge/Tool-00e5ff?style=flat-square&labelColor=0d1117" /> |
 
@@ -126,11 +126,11 @@ const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
 Full type safety with 31 methods covering every API endpoint. Install from GitHub Packages:
 
 ```bash
-npm install @MCPVOT/api-client
+npm install pequi-api-client
 ```
 
 ```typescript
-import { PequiClient, PequiApiError } from '@MCPVOT/api-client'
+import { PequiClient, PequiApiError } from 'pequi-api-client'
 
 const client = new PequiClient({ apiKey: 'pk_live_...' })
 
@@ -507,7 +507,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "pequi": {
       "command": "npx",
-      "args": ["-y", "@MCPVOT/mcp-server"]
+      "args": ["-y", "pequi-mcp-server"]
     }
   }
 }
@@ -536,16 +536,16 @@ Available inside every major AI assistant and coding agent:
 
 | Agent | How to Connect | Install |
 |-------|---------------|---------|
-| **Claude Desktop** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **Claude Desktop** | MCP Server | `npx -y pequi-mcp-server` |
 | **Claude Code** | MCP config | [`docs/claude-code-integration.md`](docs/claude-code-integration.md) |
-| **Cursor** | MCP Server | `npx -y @MCPVOT/mcp-server` |
-| **VS Code Copilot** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **Cursor** | MCP Server | `npx -y pequi-mcp-server` |
+| **VS Code Copilot** | MCP Server | `npx -y pequi-mcp-server` |
 | **ChatGPT** | Custom GPT Action | [`docs/api/custom-gpt/gpt-action.json`](docs/api/custom-gpt/gpt-action.json) |
-| **Perplexity** | MCP Server | `npx -y @MCPVOT/mcp-server` |
+| **Perplexity** | MCP Server | `npx -y pequi-mcp-server` |
 | **Z.AI (GLM-5.1)** | MCP Server | `npx -y robertcprice/glm-mcp-server` |
 | **Qwen 3.6 Plus** | MCP Server | `npx -y @iflow-mcp/gy920-qwen-mcp-tool` |
 | **OpenRouter** | MCP Server | `npx -y @stabgan/openrouter-mcp-multimodal` |
-| **OpenCode** | Plugin | `opencode plugin install @MCPVOT/opencode-pequi-plugin` |
+| **OpenCode** | Plugin | `opencode plugin install pequi-opencode-plugin` |
 | **Ollama** | Custom Tool | [`packages/ollama-tool/pequi_tool.py`](packages/ollama-tool/pequi_tool.py) |
 | **OpenClaw** | Gateway Plugin | [`packages/openclaw-plugin/pequi-gateway.js`](packages/openclaw-plugin/pequi-gateway.js) |
 

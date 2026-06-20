@@ -19,12 +19,12 @@ xpequi-api/
 ├── .well-known/              # Well-known URLs for federation
 │
 ├── packages/
-│   ├── api-client/           # TypeScript SDK (@MCPVOT/api-client)
+│   ├── api-client/           # TypeScript SDK (pequi-api-client)
 │   │   ├── src/index.ts      # 31 methods, PequiApiError, full types
 │   │   ├── package.json      # v0.3.1
 │   │   └── tsconfig.json
 │   │
-│   ├── mcp-server/           # MCP server (@MCPVOT/mcp-server)
+│   ├── mcp-server/           # MCP server (pequi-mcp-server)
 │   │   ├── src/index.ts      # 10 MCP tools
 │   │   ├── package.json
 │   │   └── examples/         # Usage examples for Claude/Cursor/Copilot
@@ -117,7 +117,7 @@ Keys use `INCR` + `EXPIRE` pattern (60s TTL for minute, 86400s for day). In-memo
 
 ## 3. SDK Architecture
 
-### 3.1 TypeScript SDK (`@MCPVOT/api-client`)
+### 3.1 TypeScript SDK (`pequi-api-client`)
 
 **File:** `packages/api-client/src/index.ts`
 **Version:** 0.3.1
