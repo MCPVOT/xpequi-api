@@ -32,7 +32,8 @@
     "build:client": "npm run build -w packages/api-client",
     "build:mcp": "npm run build -w packages/mcp-server",
     "start:mcp": "npm run start -w packages/mcp-server",
-    "test": "node packages/mcp-server/node_modules/.bin/tsx --test tests/*.test.ts"
+    "test": "node packages/mcp-server/node_modules/.bin/tsx --test tests/*.test.ts",
+    "typecheck": "tsc -b --noEmit"
   },
   "repository": {
     "type": "git",
