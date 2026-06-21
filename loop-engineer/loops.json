@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "project": "pequi",
+  "description": "Loop Engineer cron configuration for Hermes Agent",
+  "loops": [
+    {
+      "name": "support-triage",
+      "schedule": "hourly",
+      "prompt": "Pull tickets from the past hour. Triage and handle them according to the support-triage skill. Read loop-engineer/loops/support/README.md for contract. Write artifacts to loop-engineer/artifacts/.",
+      "skills": ["support-triage"],
+      "toolsets": ["terminal", "file", "web", "mcp"],
+      "workdir": "C:\\Users\\Organix\\pequi"
+    },
+    {
+      "name": "seo-content",
+      "schedule": "0 2 * * *",
+      "prompt": "Check Search Console for keyword gaps, traffic drops, 404s. Check Ahrefs for competitor gaps. Create signals and tasks per SEO loop contract. Read loop-engineer/loops/seo/README.md. Write to loop-engineer/artifacts/.",
+      "skills": ["seo-research"],
+      "toolsets": ["terminal", "file", "web", "mcp"],
+      "workdir": "C:\\Users\\Organix\\pequi"
+    },
+    {
+      "name": "product-growth-correlation",
+      "schedule": "0 */6 * * *",
+      "prompt": "Read all signals from past 24h from loop-engineer/artifacts/signals/. Cross-reference with Vercel Analytics. Create conversion-friction signals and prioritized tasks. Read loop-engineer/loops/product-growth/README.md.",
+      "skills": ["analytics-analysis"],
+      "toolsets": ["terminal", "file", "web", "mcp"],
+      "workdir": "C:\\Users\\Organix\\pequi"
+    },
+    {
+      "name": "security-scan",
+      "schedule": "0 3 * * *",
+      "prompt": "Run npm audit, check GitHub Dependabot alerts, scan Vercel logs for auth anomalies, check droplet auth logs. Create tickets for CVEs > medium, tasks for updates, auth-anomaly signals. Read loop-engineer/loops/security/README.md.",
+      "skills": ["security-audit"],
+      "toolsets": ["terminal", "file", "web", "mcp"],
+      "workdir": "C:\\Users\\Organix\\pequi"
+    },
+    {
+      "name": "database-health",
+      "schedule": "0 4,16 * * *",
+      "prompt": "SSH to droplet, run pg_stat_statements for slow queries, check unused indexes, table bloat, backup status. Create slow-query signals and db-optimization tasks. Read loop-engineer/loops/database/README.md.",
+      "skills": ["postgres-analysis"],
+      "toolsets": ["terminal", "file", "mcp"],
+      "workdir": "C:\\Users\\Organix\\pequi"
+    }
+  ],
+  "global_log": "loop-engineer/LOGS.md",
+  "artifact_root": "loop-engineer/artifacts"
+}

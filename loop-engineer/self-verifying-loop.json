@@ -1,0 +1,64 @@
+{
+  "concept": "Self-Verifying Loop (SVL)",
+  "source": "https://github.com/JayZeeDesign/loop-engineer-template",
+  "description": "A swarm + verifier loop that runs until zero errors. Opus plans + verifies, Kimi K2.6 swarm executes.",
+  "architecture": {
+    "stages": 4,
+    "stage_1_plan": "Opus 4.8 plans work, creates per-item checklist",
+    "stage_2_execute": "Kimi K2.6 swarm (300 agents) executes in parallel",
+    "stage_3_verify": "Opus 4.8 checks EVERY output against live sources",
+    "stage_4_requeue": "Failed items go back to swarm with rejection reason. Repeat until clean."
+  },
+  "metrics": {
+    "agents": 300,
+    "steps_per_run": 4000,
+    "live_data_feeds": 5,
+    "verify_passes_to_zero": 3,
+    "first_pass_rejection_rate": "12%",
+    "second_pass_rejection_rate": "3%",
+    "third_pass_rejection_rate": "0%"
+  },
+  "data_feeds": [
+    "Binance",
+    "Yahoo Finance",
+    "World Bank",
+    "IMF",
+    "Live Stock Market"
+  ],
+  "checklist_example": {
+    "per_company": [
+      "revenue + margin pulled from a live feed",
+      "source URL attached and resolvable",
+      "figure matches source within tolerance",
+      "no field left empty"
+    ]
+  },
+  "verify_output_example": {
+    "pass": 1,
+    "checked": 100,
+    "passed": 88,
+    "rejected": [
+      { "company": "co_041", "reason": "revenue != source" },
+      { "company": "co_067", "reason": "citation 404" },
+      { "company": "co_092", "reason": "margin empty" }
+    ],
+    "action": "requeue rejected -> swarm"
+  },
+  "comparison": {
+    "raw_swarm": {
+      "runs_once": true,
+      "hidden_errors_ship": true,
+      "quality_equals": "worst agent",
+      "manual_audit": "every row",
+      "numbers": "confident, unverifiable"
+    },
+    "self_verifying_loop": {
+      "runs_until_clean": true,
+      "failures_caught_rerun": true,
+      "quality_equals": "checklist",
+      "manual_audit": "nothing (loop did it)",
+      "numbers": "traced to live source"
+    }
+  },
+  "key_insight": "Volume without verification = faster mistakes. The winners run agents that check their own work."
+}
