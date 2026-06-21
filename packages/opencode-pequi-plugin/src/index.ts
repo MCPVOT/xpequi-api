@@ -1,4 +1,4 @@
-import { PequiClient } from '@MCPVOT/api-client';
+import { PequiClient } from 'pequi-api-client';
 
 const client = new PequiClient({ apiKey: process.env.PEQUI_API_KEY || '' });
 
