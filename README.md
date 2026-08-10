@@ -18,9 +18,9 @@
 
 <p align="center">
   <a href="https://xpequi.xyz"><img src="https://img.shields.io/badge/xpequi.xyz-00e5ff?style=flat-square&logo=vercel&logoColor=white" alt="Website" /></a>
-  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/TypeScript_SDK-@MCPVOT%2Fapi--client-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript SDK" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/tree/main/packages/api-client"><img src="https://img.shields.io/badge/TypeScript_SDK-pequi--api--client-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript SDK" /></a>
   <a href="https://pypi.org/project/pequi-api-client/"><img src="https://img.shields.io/badge/Python_SDK-pequi--api--client-3776ab?style=flat-square&logo=python&logoColor=white" alt="PyPI" /></a>
-  <a href="https://github.com/MCPVOT/xpequi-api/packages"><img src="https://img.shields.io/badge/MCP_Server-@MCPVOT%2Fmcp--server-7b2d8e?style=flat-square&logo=modelcontextprotocol&logoColor=white" alt="MCP Server" /></a>
+  <a href="https://github.com/MCPVOT/xpequi-api/tree/main/packages/mcp-server"><img src="https://img.shields.io/badge/MCP_Server-pequi--mcp--server-7b2d8e?style=flat-square&logo=modelcontextprotocol&logoColor=white" alt="MCP Server" /></a>
   <br />
   <img src="https://img.shields.io/badge/license-MIT-00ff88?style=flat-square&labelColor=0d1117" alt="License" />
   <img src="https://img.shields.io/badge/Status-Live-00ff88?style=flat-square&labelColor=0d1117" alt="Status" />
@@ -29,12 +29,27 @@
   <img src="https://img.shields.io/badge/Open_Finance-Decreto_0368-ff7700?style=flat-square&labelColor=0d1117" alt="Open Finance" />
   <img src="https://img.shields.io/badge/Ibague-64_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Ibagué" />
   <img src="https://img.shields.io/badge/Bogota-212_barrios-00e5ff?style=flat-square&labelColor=0d1117" alt="Bogotá" />
-   <img src="https://img.shields.io/badge/API-31_endpoints-00ff88?style=flat-square&labelColor=0d1117" alt="Endpoints" />
+  <img src="https://img.shields.io/badge/API-31_endpoints-00ff88?style=flat-square&labelColor=0d1117" alt="Endpoints" />
 </p>
 
 ---
 
-## Overview
+## Table of Contents
+
+- [What it is](#what-it-is)
+- [Endpoints overview](#endpoints-overview)
+- [c402 monetization](#c402-monetization)
+- [SDKs](#sdks)
+- [Quickstart](#quickstart)
+- [API reference](#api-reference)
+- [MCP server](#mcp-server)
+- [AI agent integration](#ai-agent-integration)
+- [Docs & links](#docs--links)
+- [License](#license)
+
+---
+
+## What it is
 
 Colombia's first public real estate data API — built on **Open Finance (Decreto 0368)**. Search properties, query neighborhoods with estratos, get reference prices per m², valuate properties with AVM, and access live financial indicators (UVR/IPC) from Banco de la Republica.
 
@@ -60,70 +75,157 @@ Colombia's first public real estate data API — built on **Open Finance (Decret
 
 ---
 
-## Quick Start
+## Endpoints overview
 
-No API key needed for GET endpoints. Three commands, zero setup:
+All endpoints live under `https://xpequi.xyz/api/v1/`. Full request/response schemas: [`docs/api/openapi.yaml`](docs/api/openapi.yaml) (OpenAPI 3.0.3, importable into Postman).
 
-```bash
-# Search properties in Bogota
-curl https://xpequi.xyz/api/v1/properties?city=bogota&limit=3
+### Properties & Neighborhoods
 
-# Neighborhoods with estratos
-curl https://xpequi.xyz/api/v1/barrios?city=ibague
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/properties` | Search properties with filters (city, type, price, bedrooms, estrato) | — |
+| `GET` | `/api/v1/barrios` | 64 barrios Ibagué · 212 barrios Bogotá with estrato and GIS | — |
+| `GET` | `/api/v1/benchmarks` | Reference prices per m² by neighborhood and type | — |
+| `GET` | `/api/v1/geocode` | Address → coordinates (OpenStreetMap Nominatim) | — |
+| `POST` | `/api/v1/avm` | Automated valuation with comparable properties | — |
+| `POST` | `/api/v1/avm/bulk` | Batch AVM (up to 100 properties, idempotency-supported) | — |
 
-# Live UVR from Banco de la Republica
-curl https://xpequi.xyz/api/v1/uvr
+### Financial Indicators
 
-# IPC inflation - Ley 820 rent adjustment
-curl https://xpequi.xyz/api/v1/ipc
-```
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/uvr` | Current UVR — Banco de la República (live via MCP) | — |
+| `GET` | `/api/v1/ipc` | Annual IPC inflation — for Ley 820 rent adjustments | — |
+| `POST` | `/api/v1/rent-increase` | Calculate legal rent increase per Ley 820 | — |
+| `GET` | `/api/v1/mortgage-rates` | 34 mortgage products from 10 Colombian banks | — |
 
-Or use the TypeScript SDK:
+### Bogotá
 
-```typescript
-import { PequiClient } from 'pequi-api-client'
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/bogota/upz` | Bogotá UPZ units (117) — land use, TransMilenio | — |
+| `GET` | `/api/v1/bogota/cadastral` | IGAC cadastral reference values by localidad + estrato | — |
 
-const client = new PequiClient()
-const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
-```
+### Contracts & Payments
 
-> **No API key needed** for GET endpoints (properties, barrios, benchmarks, geocode, UVR, IPC, complexes). Only write operations require authentication. [Get your free API key →](https://xpequi.xyz/developers)
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/v1/contracts` | Generate Ley 820 rental contract | API Key |
+| `GET` | `/api/v1/contracts/{id}` | Retrieve a generated contract | API Key |
+| `POST` | `/api/v1/payments` | Create Wompi payment (PSE, Nequi, Daviplata, card) | API Key |
+| `GET` | `/api/v1/payments/{id}` | Check payment status | API Key |
+
+### Complexes (Conjuntos Residenciales)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/complexes` | List residential complexes | — |
+| `GET` | `/api/v1/complexes/{slug}` | Complex details (amenities, units, images) | — |
+| `GET` | `/api/v1/complexes/{slug}/units` | Individual units within a complex | — |
+
+### AI & Communication
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/v1/chat` | AI real estate assistant (streaming SSE) | API Key |
+| `POST` | `/api/v1/visits` | Schedule property visit | API Key |
+| `POST` | `/api/v1/upload` | Upload files (max 5MB, images/docs) | API Key |
+| `POST` | `/api/v1/bank-verification` | Verify Colombian bank accounts (Prometeo Open Finance) | API Key |
+
+### c402 Monetization
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/credits` | Prepaid credit balance and pack pricing | — |
+| `POST` | `/api/v1/credits/purchase` | Buy credit pack via Wompi | API Key |
+| `POST` | `/api/v1/subscriptions/api-checkout` | Monthly subscription (AGENTE/CONJUNTO) | API Key |
+
+### Monitoring
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/v1/monitoring/usage` | Hourly call count, credits remaining, current tier | API Key |
+| `GET` | `/api/v1/monitoring/latency` | P50/P95/P99 latency per endpoint | API Key |
+| `GET` | `/api/v1/monitoring/errors` | 4xx/5xx breakdown per endpoint | API Key |
+| `GET` | `/api/v1/monitoring/uptime` | API availability over window | API Key |
+
+### Webhooks
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/v1/webhooks/endpoints` | Create webhook (HMAC-SHA256 signed) | API Key |
+| `GET` | `/api/v1/webhooks/endpoints` | List registered webhooks | API Key |
+| `DELETE` | `/api/v1/webhooks/endpoints/{id}` | Unregister webhook | API Key |
+| `POST` | `/api/v1/webhooks/endpoints/{id}/test` | Test webhook delivery | API Key |
 
 ---
 
-## Table of Contents
+## c402 monetization
 
-- [SDK Installation](#sdk-installation)
-- [TypeScript SDK](#typescript-sdk)
-- [Python SDK](#python-sdk)
-- [API Endpoints](#api-endpoints)
-- [Authentication](#authentication)
-- [Error Handling](#error-handling)
-- [Pagination](#pagination)
-- [Response Format](#response-format)
-- [Rate Limits & c402 Protocol](#rate-limits--c402-protocol)
-- [MCP Server](#mcp-server)
-- [AI Agent Integration](#ai-agent-integration)
-- [Support](#support)
+Pequi implements the **c402 Protocol** — a Colombian-first HTTP 402 Payment Required pattern for API monetization, payments via Wompi in COP (no crypto, no wallets).
+
+### Rate limits & tiers
+
+| Tier | Price | Limits | Buy |
+|------|-------|--------|-----|
+| **FREE** | $0/mes | 30 req/min · 150 req/day | — |
+| **PREPAGO (c402)** | Desde $2,500 COP | 50/200/1000 prepaid calls | [`/precios`](https://xpequi.xyz/precios) |
+| **AGENTE API** | $30K COP/mes | 100 req/min · 1,000 req/day | [`/precios`](https://xpequi.xyz/precios) |
+| **CONJUNTO API** | $150K COP/mes | 300 req/min · 5,000 req/day | [`/precios`](https://xpequi.xyz/precios) |
+| **ENTERPRISE** | Custom | Custom | [Contacto](mailto:contact@xpequi.xyz) |
+
+### How it works
+
+1. **FREE tier** gets 30 req/min, 150 req/day — no API key needed for GET endpoints
+2. When exceeded → `HTTP 402 Payment Required` with `X-402-Challenge` header
+3. The challenge contains a Wompi checkout URL (PSE, Nequi, Daviplata, credit card)
+4. After payment, credits auto-activate — retry with your API key
+
+**Security model:** SHA-256 webhook verification · UUID v4 single-use nonces · Atomic Redis credit deduction · 24h idempotency guard · **Zero crypto** (no blockchain, no wallets, no RSA)
+
+**Buy without an API key:**
+
+1. Go to [`/precios`](https://xpequi.xyz/precios)
+2. Click "COMPRAR →" on your tier
+3. Sign in with Clerk (Google, email, magic link)
+4. Pay via Wompi — credits/tier activate automatically
+
+```json
+{
+  "error": "payment_required",
+  "message": "Has excedido tu límite gratuito. Paga por más llamadas API.",
+  "code": "PAYMENT_REQUIRED",
+  "recoverable": true,
+  "suggestedAction": "Compra créditos prepago o suscríbete en https://xpequi.xyz/precios",
+  "c402": {
+    "nonce": "550e8400-...",
+    "amount": 2500,
+    "currency": "COP",
+    "calls": 50,
+    "paymentUrl": "https://checkout.wompi.co/p/?",
+    "expiresAt": "2026-05-15T22:00:00Z"
+  }
+}
+```
+
+Full protocol details: [c402 — pagos agénticos sin crypto](https://xpequi.xyz/blog/c402-pagos-ia-colombia)
 
 ---
 
-## SDK Installation
+## SDKs
 
 | Package | Install | Description | Status |
 |---------|---------|-------------|--------|
 | **TypeScript SDK** | `npm install pequi-api-client` | 31 methods · full type safety · every endpoint | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
-| **Python SDK** | `pip install pequi-api-client` | 16 sub-APIs · fluent interface · zero deps | <img src="https://img.shields.io/badge/PyPI-3776ab?style=flat-square&labelColor=0d1117" /> |
+| **Python SDK** | `pip install pequi-api-client` | 16 sub-APIs · fluent interface · minimal deps | <img src="https://img.shields.io/badge/PyPI-3776ab?style=flat-square&labelColor=0d1117" /> |
 | **MCP Server** | `npx -y pequi-mcp-server` | Claude Desktop · Cursor · Copilot · Smithery | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
 | **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway (archived — OpenClaw removed from stack May 2026) | <img src="https://img.shields.io/badge/Archived-888?style=flat-square&labelColor=0d1117" /> |
 | **Ollama Tool** | `packages/ollama-tool/` | Local LLM property search via Ollama | <img src="https://img.shields.io/badge/Tool-00e5ff?style=flat-square&labelColor=0d1117" /> |
+| **OpenCode Plugin** | `opencode plugin install pequi-opencode-plugin` | Agent plugin for OpenCode | <img src="https://img.shields.io/badge/Plugin-00e5ff?style=flat-square&labelColor=0d1117" /> |
 
+### TypeScript SDK
 
----
-
-## TypeScript SDK
-
-Full type safety with 31 methods covering every API endpoint. Install from GitHub Packages:
+Full type safety with 31 methods covering every API endpoint. Install from npm:
 
 ```bash
 npm install pequi-api-client
@@ -132,7 +234,7 @@ npm install pequi-api-client
 ```typescript
 import { PequiClient, PequiApiError } from 'pequi-api-client'
 
-const client = new PequiClient({ apiKey: 'pk_live_...' })
+const client = new PequiClient({ apiKey: *** })
 
 // ── Search properties ──────────────────────────────────────
 const properties = await client.searchProperties({
@@ -225,11 +327,9 @@ try {
 }
 ```
 
----
+### Python SDK
 
-## Python SDK
-
-Fluent sub-API design with 16 domains. Zero external dependencies (stdlib only):
+Fluent sub-API design with 16 domains. Minimal dependencies (`urllib3`, `python-dateutil`, `certifi`):
 
 ```bash
 pip install pequi-api-client
@@ -274,93 +374,86 @@ except PequiApiError as e:
     print(e.status, e.code, e.message)
 ```
 
----
+### Installation channels
 
-## API Endpoints
+#### 1. npm (recommended)
+```bash
+# SDK
+npm install pequi-api-client
 
-### Properties & Neighborhoods
+# MCP server (Claude, Cursor, Copilot)
+npx -y pequi-mcp-server
+```
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/v1/properties` | Search properties with filters (city, type, price, bedrooms, estrato) | — |
-| `GET` | `/api/v1/barrios` | 64 barrios Ibagué · 212 barrios Bogotá with estrato and GIS | — |
-| `GET` | `/api/v1/benchmarks` | Reference prices per m² by neighborhood and type | — |
-| `GET` | `/api/v1/geocode` | Address → coordinates (OpenStreetMap Nominatim) | — |
-| `POST` | `/api/v1/avm` | Automated valuation with comparable properties | — |
-| `POST` | `/api/v1/avm/bulk` | Batch AVM (up to 100 properties, idempotency-supported) | — |
+#### 2. JSR
+```bash
+npx jsr add @pequi/api-client
+```
 
-### Financial Indicators
+#### 3. Docker (MCP server)
+```bash
+docker pull ghcr.io/mcpvot/pequi-mcp-server
+docker run -p 3100:3100 ghcr.io/mcpvot/pequi-mcp-server
+```
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/v1/uvr` | Current UVR — Banco de la República (live via MCP) | — |
-| `GET` | `/api/v1/ipc` | Annual IPC inflation — for Ley 820 rent adjustments | — |
-| `POST` | `/api/v1/rent-increase` | Calculate legal rent increase per Ley 820 | — |
-
-### Contracts & Payments
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `POST` | `/api/v1/contracts` | Generate Ley 820 rental contract | API Key |
-| `POST` | `/api/v1/payments` | Create Wompi payment (PSE, Nequi, Daviplata, card) | API Key |
-| `GET` | `/api/v1/payments/{id}` | Check payment status | API Key |
-
-### Complexes (Conjuntos Residenciales)
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/v1/complexes` | List residential complexes | — |
-| `GET` | `/api/v1/complexes/{slug}` | Complex details (amenities, units, images) | — |
-| `GET` | `/api/v1/complexes/{slug}/units` | Individual units within a complex | — |
-
-### AI & Communication
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `POST` | `/api/v1/chat` | AI real estate assistant (streaming SSE) | API Key |
-| `POST` | `/api/v1/visits` | Schedule property visit | API Key |
-| `POST` | `/api/v1/upload` | Upload files (max 5MB, images/docs) | API Key |
-| `POST` | `/api/v1/bank-verification` | Verify Colombian bank accounts (Prometeo Open Finance) | API Key |
-
-### c402 Monetization
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/v1/credits` | Prepaid credit balance and pack pricing | — |
-| `POST` | `/api/v1/credits/purchase` | Buy credit pack via Wompi | API Key |
-| `POST` | `/api/v1/subscriptions/api-checkout` | Monthly subscription (AGENTE/CONJUNTO) | API Key |
-
-### Monitoring
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/v1/monitoring/usage` | Hourly call count, credits remaining, current tier | API Key |
-| `GET` | `/api/v1/monitoring/latency` | P50/P95/P99 latency per endpoint | API Key |
-| `GET` | `/api/v1/monitoring/errors` | 4xx/5xx breakdown per endpoint | API Key |
-| `GET` | `/api/v1/monitoring/uptime` | API availability over window | API Key |
-
-### Webhooks
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `POST` | `/api/v1/webhooks/endpoints` | Create webhook (HMAC-SHA256 signed) | API Key |
-| `GET` | `/api/v1/webhooks/endpoints` | List registered webhooks | API Key |
-| `DELETE` | `/api/v1/webhooks/endpoints/{id}` | Unregister webhook | API Key |
-| `POST` | `/api/v1/webhooks/endpoints/{id}/test` | Test webhook delivery | API Key |
+#### 4. Direct from GitHub (no registry)
+```json
+{
+  "mcpServers": {
+    "pequi": {
+      "command": "npx",
+      "args": ["github:MCPVOT/xpequi-api/packages/mcp-server"]
+    }
+  }
+}
+```
 
 ---
 
-## Authentication
+## Quickstart
+
+No API key needed for GET endpoints. Three commands, zero setup:
+
+```bash
+# Search properties in Bogota
+curl https://xpequi.xyz/api/v1/properties?city=bogota&limit=3
+
+# Neighborhoods with estratos
+curl https://xpequi.xyz/api/v1/barrios?city=ibague
+
+# Live UVR from Banco de la Republica
+curl https://xpequi.xyz/api/v1/uvr
+
+# IPC inflation - Ley 820 rent adjustment
+curl https://xpequi.xyz/api/v1/ipc
+```
+
+Or with the TypeScript SDK:
+
+```typescript
+import { PequiClient } from 'pequi-api-client'
+
+const client = new PequiClient()
+const properties = await client.searchProperties({ city: 'bogota', limit: 5 })
+```
+
+> **No API key needed** for GET endpoints (properties, barrios, benchmarks, geocode, UVR, IPC, complexes). Only write operations require authentication. [Get your free API key →](https://xpequi.xyz/developers)
+
+---
+
+## API reference
+
+### Authentication
 
 Most public GET endpoints work without authentication. Write endpoints require a Bearer token:
 
 ```
-Authorization: Bearer pk_live_abc123def456
+Authorization: Bearer pk_liv...f456
 ```
 
 Get your API key from the [Developer Portal](https://xpequi.xyz/developers). API keys are SHA-256 hashed at rest and scoped to specific tiers.
 
-### Tier Limits by Key
+#### Tier limits by key
 
 | Scope | Without Key | With FREE Key | With AGENTE Key | With CONJUNTO Key |
 |-------|-------------|---------------|-----------------|-------------------|
@@ -370,9 +463,7 @@ Get your API key from the [Developer Portal](https://xpequi.xyz/developers). API
 | Payments | ❌ | ❌ | ❌ | ✅ Write |
 | Webhooks | ❌ | ❌ | ✅ CRUD | ✅ CRUD |
 
----
-
-## Error Handling
+### Error handling
 
 All errors return a standardized envelope that both human developers and AI agents can parse deterministically:
 
@@ -387,7 +478,7 @@ All errors return a standardized envelope that both human developers and AI agen
 }
 ```
 
-### Error Codes
+#### Error codes
 
 | Code | HTTP | Meaning | Recoverable |
 |------|------|---------|-------------|
@@ -404,9 +495,7 @@ All errors return a standardized envelope that both human developers and AI agen
 
 **Agent tip:** Use `recoverable` to decide whether to retry. Use `retryAfter` (seconds) for backoff.
 
----
-
-## Pagination
+### Pagination
 
 Endpoints that return lists support cursor-based pagination:
 
@@ -418,9 +507,7 @@ Parameters: `limit` (max 100, default 20), `page` (1-indexed, default 1).
 
 The response includes a `meta` object with pagination info where available.
 
----
-
-## Response Format
+### Response format
 
 All API responses follow a consistent structure:
 
@@ -449,56 +536,9 @@ All API responses follow a consistent structure:
 
 ---
 
-## Rate Limits & c402 Protocol
+## MCP server
 
-| Tier | Price | Limits | Buy |
-|------|-------|--------|-----|
-| **FREE** | $0/mes | 30 req/min · 150 req/day | — |
-| **PREPAGO (c402)** | Desde $2,500 COP | 50/200/1000 prepaid calls | [`/precios`](https://xpequi.xyz/precios) |
-| **AGENTE API** | $30K COP/mes | 100 req/min · 1,000 req/day | [`/precios`](https://xpequi.xyz/precios) |
-| **CONJUNTO API** | $150K COP/mes | 300 req/min · 5,000 req/day | [`/precios`](https://xpequi.xyz/precios) |
-| **ENTERPRISE** | Custom | Custom | [Contacto](mailto:contact@xpequi.xyz) |
-
-Pequi implements the **c402 Protocol** — a Colombian-first HTTP 402 Payment Required pattern:
-
-1. **FREE tier** gets 30 req/min, 150 req/day — no API key needed for GET endpoints
-2. When exceeded → `HTTP 402 Payment Required` with `X-402-Challenge` header
-3. The challenge contains a Wompi checkout URL (PSE, Nequi, Daviplata, credit card)
-4. After payment, credits auto-activate — retry with your API key
-
-**Security model:** SHA-256 webhook verification · UUID v4 single-use nonces · Atomic Redis credit deduction · 24h idempotency guard · **Zero crypto** (no blockchain, no wallets, no RSA)
-
-**Buy without an API key:**
-1. Go to [`/precios`](https://xpequi.xyz/precios)
-2. Click "COMPRAR →" on your tier
-3. Sign in with Clerk (Google, email, magic link)
-4. Pay via Wompi — credits/tier activate automatically
-
-```json
-{
-  "error": "payment_required",
-  "message": "Has excedido tu límite gratuito. Paga por más llamadas API.",
-  "code": "PAYMENT_REQUIRED",
-  "recoverable": true,
-  "suggestedAction": "Compra créditos prepago o suscríbete en https://xpequi.xyz/precios",
-  "c402": {
-    "nonce": "550e8400-...",
-    "amount": 2500,
-    "currency": "COP",
-    "calls": 50,
-    "paymentUrl": "https://checkout.wompi.co/p/?",
-    "expiresAt": "2026-05-15T22:00:00Z"
-  }
-}
-```
-
-Full protocol details: [c402 — pagos agénticos sin crypto](https://xpequi.xyz/blog/c402-pagos-ia-colombia)
-
----
-
-## MCP Server
-
-[Join the MCP Directory](https://mcp.so) | [Smithery](https://smithery.ai) | [Mintlify](https://mintlify.com)
+MCP discovery: `.well-known/mcp` in this repo · [MCP Directory](https://mcp.so) | [Smithery](https://smithery.ai) | [Mintlify](https://mintlify.com)
 
 Add to `claude_desktop_config.json`:
 
@@ -513,7 +553,7 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-### Available MCP Tools (10)
+### Available MCP tools (10)
 
 | Tool | Description |
 |------|-------------|
@@ -524,13 +564,13 @@ Add to `claude_desktop_config.json`:
 | `get_uvr` | Current UVR from Banco de la República |
 | `get_ipc` | Annual IPC inflation for Ley 820 adjustments |
 | `calculate_rent_increase` | Calculate legal rent increase |
-| `get_upzs` | **NEW** Bogotá UPZ boundaries — 117 units, land use, TransMilenio |
-| `get_cadastral_valuation` | **NEW** IGAC cadastral reference values by localidad+estrato |
-| `get_mortgage_rates` | **NEW** 34 mortgage products from 10 Colombian banks |
+| `get_upzs` | Bogotá UPZ boundaries — 117 units, land use, TransMilenio |
+| `get_cadastral_valuation` | IGAC cadastral reference values by localidad+estrato |
+| `get_mortgage_rates` | 34 mortgage products from 10 Colombian banks |
 
 ---
 
-## AI Agent Integration
+## AI agent integration
 
 Available inside every major AI assistant and coding agent:
 
@@ -551,53 +591,20 @@ Available inside every major AI assistant and coding agent:
 
 All agents use the same `/api/v1/` endpoints. No API key needed for FREE tier (30 req/min).
 
-
-
 ---
 
-## Installation (3 Ways)
-
-### 1. npm (recommended)
-```bash
-# SDK
-npm install pequi-api-client
-
-# MCP server (Claude, Cursor, Copilot)
-npx -y pequi-mcp-server
-```
-
-### 2. JSR
-```bash
-npx jsr add @pequi/api-client
-```
-
-### 3. Docker (MCP server)
-```bash
-docker pull ghcr.io/mcpvot/pequi-mcp-server
-docker run -p 3100:3100 ghcr.io/mcpvot/pequi-mcp-server
-```
-
-Or install directly from GitHub without any registry:
-```json
-{
-  "mcpServers": {
-    "pequi": {
-      "command": "npx",
-      "args": ["github:MCPVOT/xpequi-api/packages/mcp-server"]
-    }
-  }
-}
-```
-
-## Support
+## Docs & links
 
 - **OpenAPI Spec:** `docs/api/openapi.yaml` — 31 endpoints, full request/response schemas, importable into Postman
 - **Interactive Docs:** [xpequi.xyz/developers](https://xpequi.xyz/developers) — Swagger UI playground
 - **AI Agents Guide:** [xpequi.xyz/developers/agents](https://xpequi.xyz/developers/agents) — MCP setup & best practices
 - **Developer Portal:** [xpequi.xyz/developers](https://xpequi.xyz/developers) — API keys, usage, monitoring
+- **Claude Code Integration:** [`docs/claude-code-integration.md`](docs/claude-code-integration.md)
 - **Email:** [contact@xpequi.xyz](mailto:contact@xpequi.xyz)
 - **Blog:** [xpequi.xyz/blog](https://xpequi.xyz/blog) — Ley 820 guides, Open Finance, c402 protocol
 - **Status:** [xpequi.xyz/api/health](https://xpequi.xyz/api/health) — Live API status
+- **Changelog:** [`CHANGELOG.md`](CHANGELOG.md)
+- **Security:** [`SECURITY.md`](SECURITY.md)
 
 ---
 
