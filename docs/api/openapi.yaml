@@ -70,6 +70,11 @@ tags:
   - name: Blog
     description: Blog sharing rewards
 
+# Global security: all endpoints require the c402 API key by default.
+# Public endpoints override with `security: []` at the operation level.
+security:
+  - ApiKeyAuth: []
+
 paths:
   # ── Properties ──
   /properties:
