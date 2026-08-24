@@ -24,8 +24,7 @@
     "open-source"
   ],
   "workspaces": [
-    "packages/api-client",
-    "packages/mcp-server"
+    "packages/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
