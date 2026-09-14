@@ -4,13 +4,18 @@
  * @pequi/mcp-server — MCP Server for Pequi Real Estate API
  *
  * Colombia's first real estate data API, accessible via the Model Context Protocol.
- * Enables AI assistants to search properties, lookup neighborhoods,
- * get price benchmarks, and geocode addresses in Ibagué, Bogotá, and expanding cities.
+ * Exposes 10 tools: property search, neighborhood and benchmark data, geocoding,
+ * UVR and IPC indices, mortgage rates, Bogotá UPZ boundaries, cadastral valuations,
+ * and the Ley 820 legal rent-increase calculator.
+ *
+ * CANONICAL SOURCE: this file is the single source of truth for pequi-mcp-server.
+ * The MCPVOT/xpequi-api copy must mirror it (see docs/mcp-server-canonical.md).
  *
  * Usage:
  *   pequi-mcp              # stdio mode (for Cursor, Claude Desktop)
  *   PEQUI_API_KEY=xxx pequi-mcp
  *   pequi-mcp --port 3100  # SSE mode (for custom servers)
+ *   pequi-mcp --port 3100 --streamable-http  # MCP 2026-07-28 stateless Streamable HTTP
  *
  * Environment:
  *   PEQUI_API_KEY    — API key for authenticated requests (free tier works)
@@ -29,19 +34,17 @@ import {
 } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 import http from 'node:http'
+import { createReadStream, existsSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 // ─── Configuration ────────────────────────────────────────────────
 
 const API_KEY = process.env.PEQUI_API_KEY || ''
 const API_BASE = process.env.PEQUI_API_URL || 'https://xpequi.xyz/api/v1'
 const PORT = parseInt(process.env.PEQUI_MCP_PORT || '3100', 10)
-const SERVER_NAME = 'pequi-mcp-server'
-const SERVER_VERSION = '0.3.1'  // Must match packages/mcp-server/package.json
-
-// Retry/backoff configuration
-const MAX_RETRIES = 2
-const RETRY_DELAY_MS = 1000
-const FETCH_TIMEOUT_MS = 15000
+const SERVER_NAME = '@MCPVOT/mcp-server'
+const SERVER_VERSION = '0.1.0'
 
 // ─── API Client ───────────────────────────────────────────────────
 
@@ -59,33 +62,12 @@ async function apiGet<T>(path: string, params?: Record<string, string | undefine
   }
   if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
 
-  let lastError: Error | null = null
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-      const res = await fetch(url.toString(), { headers, signal: controller.signal })
-      clearTimeout(timer)
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => '')
-        const err = new Error(`API ${res.status}: ${text.slice(0, 200)}`)
-        // Don't retry client errors (4xx)
-        if (res.status >= 400 && res.status < 500) throw err
-        throw err
-      }
-      return res.json() as Promise<T>
-    } catch (err: any) {
-      lastError = err
-      if (err.name === 'AbortError') {
-        lastError = new Error(`Request timed out after ${FETCH_TIMEOUT_MS}ms`)
-      }
-      if (attempt < MAX_RETRIES) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)))
-      }
-    }
+  const res = await fetch(url.toString(), { headers })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`API ${res.status}: ${text.slice(0, 200)}`)
   }
-  throw lastError || new Error('Unknown API error')
+  return res.json() as Promise<T>
 }
 
 // ─── Zod Schemas ──────────────────────────────────────────────────
@@ -119,19 +101,15 @@ const GeocodeSchema = z.object({
   address: z.string().describe('Address to geocode (e.g., "Calle 10 #3-15, Ibagué")'),
 })
 
-const GetUvrSchema = z.object({})
-
-const GetIpcSchema = z.object({})
-
-const CalculateRentIncreaseSchema = z.object({
-  currentRent: z.coerce.number().positive().describe('Current monthly rent amount in COP'),
-  ipc: z.coerce.number().optional().describe('IPC variation rate (defaults to current IPC if not provided)'),
+const GetMortgageRatesSchema = z.object({
+  bank: z.string().optional().describe('Filter by bank name (e.g. "Bancolombia", "Davivienda")'),
+  product: z.enum(['vivienda_nueva', 'vivienda_usada', 'vis', 'remodelacion', 'lote', 'leasing']).optional().describe('Filter by product type'),
 })
 
 const GetUPZsSchema = z.object({
   localidad: z.string().optional().describe('Filter by localidad name (e.g. "Usaquén", "Chapinero")'),
   zone: z.enum(['norte', 'centro', 'occidente', 'sur']).optional().describe('Filter by cardinal zone'),
-  hasTransmilenio: z.coerce.boolean().optional().describe('Filter by TransMilenio coverage'),
+  hasTransmilenio: z.coerce.boolean().optional().describe('Filter by Transmilenio coverage'),
 })
 
 const GetCadastralValuationSchema = z.object({
@@ -139,46 +117,37 @@ const GetCadastralValuationSchema = z.object({
   estrato: z.coerce.number().min(1).max(6).optional().describe('Filter by stratum (1-6)'),
 })
 
-const GetMortgageRatesSchema = z.object({
-  bank: z.string().optional().describe('Filter by bank name (e.g. "Bancolombia", "Davivienda")'),
-  product: z.enum(['vivienda_nueva', 'vivienda_usada', 'vis', 'remodelacion', 'lote', 'leasing']).optional().describe('Filter by product type'),
+const CalculateRentIncreaseSchema = z.object({
+  currentRent: z.coerce.number().positive().describe('Current monthly rent amount in COP'),
+  ipc: z.coerce.number().optional().describe('IPC variation rate (defaults to current IPC if not provided)'),
 })
 
 // ─── Tool Definitions ─────────────────────────────────────────────
 
-const TOOLS: Array<{
-  name: string
-  description: string
-  inputSchema: {
-    type: string
-    properties: Record<string, unknown>
-    required?: string[]
-  }
-}> = [
+const TOOLS = [
   {
     name: 'search_properties',
-    description:
-      'Search real estate listings in Colombian cities. Supports ibague, bogota, cali, medellin, barranquilla. Filter by property type (apartamento/casa/local/oficina/lote/finca/habitacion), neighborhood, price range, bedrooms, bathrooms, stratum (1-6), and operation type. Returns paginated results with full details including location, price, features, and GIS coordinates.',
+    description: `Search for properties in Colombian cities (Ibagué, Bogotá, and expanding). Filter by type, neighborhood, price range, bedrooms, bathrooms, stratum, and transaction type. Returns paginated results with full property details including location, price, features, and GIS coordinates.`,
     inputSchema: {
       type: 'object',
       properties: {
         city: { type: 'string', description: 'City slug: ibague, bogota, cali, medellin, barranquilla (default: ibague)' },
-        tipo: { type: 'string', enum: ['apartamento', 'casa', 'local', 'oficina', 'lote', 'finca', 'habitacion'], description: 'Property type filter' },
-        barrio: { type: 'string', description: 'Neighborhood name (e.g. "centro", "picaleña", "la-islita")' },
-        estrato: { type: 'number', description: 'Socioeconomic stratum 1-6', minimum: 1, maximum: 6 },
+        tipo: { type: 'string', enum: ['apartamento', 'casa', 'local', 'oficina', 'lote', 'finca', 'habitacion'], description: 'Property type' },
+        barrio: { type: 'string', description: 'Neighborhood name' },
+        estrato: { type: 'number', description: 'Estrato (1-6)', minimum: 1, maximum: 6 },
         min_price: { type: 'number', description: 'Minimum monthly price in COP' },
         max_price: { type: 'number', description: 'Maximum monthly price in COP' },
-        cuartos: { type: 'number', description: 'Minimum number of bedrooms' },
-        banos: { type: 'number', description: 'Minimum number of bathrooms' },
-        operacion: { type: 'string', enum: ['venta', 'arriendo'], description: 'Transaction type: "venta" (sale) or "arriendo" (rent)' },
+        cuartos: { type: 'number', description: 'Minimum bedrooms' },
+        banos: { type: 'number', description: 'Minimum bathrooms' },
+        operacion: { type: 'string', enum: ['venta', 'arriendo'], description: 'Sale or rent' },
         limit: { type: 'number', description: 'Results per page (1-100)', default: 20 },
-        page: { type: 'number', description: 'Page number for pagination', default: 1 },
+        page: { type: 'number', description: 'Page number', default: 1 },
       },
     },
   },
   {
     name: 'get_barrios',
-    description: `Get all neighborhoods in a Colombian city with socioeconomic stratum (estrato), GIS coordinates (lat/lng), location descriptions, and demographic data. Supports Ibagué (64 barrios) and Bogotá (212 barrios across 20 localities). Essential for market analysis and property filtering.`,
+    description: `Get all neighborhoods in a Colombian city with their socioeconomic stratum (estrato), GIS coordinates, and general data. Supports Ibagué (64 barrios), Bogotá (212 barrios), and expanding.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -188,24 +157,24 @@ const TOOLS: Array<{
   },
   {
     name: 'get_benchmarks',
-    description: `Get real estate price benchmarks (average, min, max price per m²) broken down by neighborhood, property type, and stratum. Ideal for investment analysis, rental comparisons, and market research. Supports Ibagué and Bogotá.`,
+    description: `Get real estate price benchmarks for Colombian cities. Returns average, min, and max prices per square meter broken down by neighborhood, property type, and stratum. Essential for market analysis, investment decisions, and rental comparisons. Supports Ibagué and Bogotá.`,
     inputSchema: {
       type: 'object',
       properties: {
         city: { type: 'string', description: 'City slug: ibague, bogota (default: ibague)' },
-        barrio: { type: 'string', description: 'Filter by specific neighborhood name' },
+        barrio: { type: 'string', description: 'Filter by neighborhood' },
         tipo: { type: 'string', enum: ['apartamento', 'casa', 'local'], description: 'Filter by property type' },
-        estrato: { type: 'number', description: 'Filter by socioeconomic stratum (1-6)', minimum: 1, maximum: 6 },
+        estrato: { type: 'number', description: 'Filter by estrato (1-6)', minimum: 1, maximum: 6 },
       },
     },
   },
   {
     name: 'geocode',
-    description: `Convert any human-readable Colombian address into precise GIS coordinates (latitude, longitude). Covers all municipalities — returns full address breakdown including barrio, comuna, and department. Essential for mapping properties or proximity analysis.`,
+    description: `Convert a human-readable address in Colombia to GIS coordinates (latitude, longitude). Useful for mapping properties and understanding locations.`,
     inputSchema: {
       type: 'object',
       properties: {
-        address: { type: 'string', description: 'Address to geocode (e.g. "Calle 10 #3-15, Ibagué" or "Carrera 7 #72-40, Bogotá")' },
+        address: { type: 'string', description: 'Address to geocode (e.g., "Calle 10 #3-15, Ibagué" or "Carrera 7 #72-40, Bogotá")' },
       },
       required: ['address'],
     },
@@ -227,32 +196,31 @@ const TOOLS: Array<{
     },
   },
   {
-    name: 'calculate_rent_increase',
-    description: `Calculate the maximum legal rent increase in Colombia under Ley 820/2003. Uses the current IPC inflation rate (or a provided rate) to compute the adjusted rent amount. Essential for landlords and tenants during annual contract renewal. Input: current monthly rent in COP, optional IPC rate. Output: adjusted rent, increase amount, increase percentage, and the legal formula reference.`,
+    name: 'get_mortgage_rates',
+    description: `Get current mortgage rates from Colombian banks (34 products across 10 banks, per Superfinanciera). Each product includes effective annual rate (TEA), UVR spread, max term, LTV range, monthly payment per COP 1M, and year-over-year change.`,
     inputSchema: {
       type: 'object',
       properties: {
-        currentRent: { type: 'number', description: 'Current monthly rent amount in COP (e.g., 1500000)' },
-        ipc: { type: 'number', description: 'Optional IPC variation rate to use (e.g., 5.82). Defaults to current IPC from BanRep if not provided.' },
+        bank: { type: 'string', description: 'Filter by bank name (e.g. "Bancolombia", "Davivienda", "Banco de Bogotá", "BBVA")' },
+        product: { type: 'string', enum: ['vivienda_nueva', 'vivienda_usada', 'vis', 'remodelacion', 'lote', 'leasing'], description: 'Filter by product type' },
       },
-      required: ['currentRent'],
     },
   },
   {
     name: 'get_upzs',
-    description: `Query Bogotá UPZ (Unidad de Planeamiento Zonal) boundary data — 117 planning units across all 20 localidades. Each UPZ includes: bounding box, area (hectares), predominant land use (residential/commercial/industrial/institutional/mixed/rural), estrato range, building height limits (floors), and TransMilenio coverage. Filter by localidad, cardinal zone (norte/centro/occidente/sur), or TransMilenio access. Essential for urban planning analysis and property development research.`,
+    description: `Query Bogotá UPZ (Unidad de Planeamiento Zonal) boundary data — 117 planning units across all 20 localidades. Each UPZ includes bounding box, area, predominant land use, estrato range, building height limits, and Transmilenio coverage.`,
     inputSchema: {
       type: 'object',
       properties: {
         localidad: { type: 'string', description: 'Filter by localidad name (e.g. "Usaquén", "Chapinero", "Suba")' },
         zone: { type: 'string', enum: ['norte', 'centro', 'occidente', 'sur'], description: 'Filter by cardinal zone' },
-        hasTransmilenio: { type: 'boolean', description: 'Filter by TransMilenio trunk line coverage' },
+        hasTransmilenio: { type: 'boolean', description: 'Filter by Transmilenio trunk line coverage' },
       },
     },
   },
   {
     name: 'get_cadastral_valuation',
-    description: `Get IGAC cadastral reference values (avalúo catastral) for Bogotá by localidad and socioeconomic stratum. Returns: valor catastral per m² (constructed), land value per m², estimated market price per m² (2-5x cadastral), and year-over-year change. Based on IGAC 2025-2026 biennial update. These values determine property tax (impuesto predial) calculations.`,
+    description: `Get IGAC cadastral reference values (avalúo catastral) for Bogotá by localidad and socioeconomic stratum: cadastral value per m², land value per m², estimated market price per m², and year-over-year change. These values determine impuesto predial.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -263,23 +231,34 @@ const TOOLS: Array<{
     },
   },
   {
-    name: 'get_mortgage_rates',
-    description: `Get current mortgage rates from Colombian banks — 34 products across 10 banks. Data from Superfinanciera de Colombia (April 2026). Each product includes: effective annual rate (TEA), spread over UVR, max term, LTV range, monthly payment per COP 1M, and year-over-year change. Supports filtering by bank and product type (new home, used home, VIS, remodeling, lot, leasing). Includes helper functions: getLowestVisRate, calculateMonthlyPayment, getMarketSummary.`,
+    name: 'calculate_rent_increase',
+    description: `Calculate the maximum legal rent increase in Colombia under Ley 820/2003 using the current IPC inflation rate (or a provided rate). Input: current monthly rent in COP. Output: adjusted rent, increase amount, increase percentage, and the legal formula reference.`,
     inputSchema: {
       type: 'object',
       properties: {
-        bank: { type: 'string', description: 'Filter by bank name (e.g. "Bancolombia", "Davivienda", "Banco de Bogotá", "BBVA")' },
-        product: { type: 'string', enum: ['vivienda_nueva', 'vivienda_usada', 'vis', 'remodelacion', 'lote', 'leasing'], description: 'Filter by product type' },
+        currentRent: { type: 'number', description: 'Current monthly rent amount in COP (e.g., 1500000)' },
+        ipc: { type: 'number', description: 'Optional IPC variation rate to use (e.g., 5.82). Defaults to current IPC from BanRep if not provided.' },
       },
+      required: ['currentRent'],
     },
   },
 ]
 
 // ─── MCP Server ───────────────────────────────────────────────────
 
+// MCP protocol revision: 2026-07-28 (stateless servers, Streamable HTTP).
+// The SDK negotiates the highest mutually-supported version during initialize;
+// declaring it here advertises c402's MCP surface as latest-spec.
+const PROTOCOL_VERSION = '2026-07-28'
+
 const server = new Server(
   { name: SERVER_NAME, version: SERVER_VERSION },
-  { capabilities: { tools: {}, resources: {} } },
+  {
+    capabilities: { tools: {}, resources: {} },
+    instructions:
+      'Pequi — Colombia real estate data via c402. Paid calls use HTTP 402 ' +
+      '(X-402-Challenge / X-402-Payment-Id, COP via Wompi). Free tier available.',
+  },
 )
 
 // List Tools
@@ -354,7 +333,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
       }
 
-      case 'get_uvr': {
+            case 'get_uvr': {
         const data = await apiGet('/uvr')
         return {
           content: [{
@@ -374,35 +353,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
       }
 
-      case 'calculate_rent_increase': {
-        const params = CalculateRentIncreaseSchema.parse(args || {})
-        const data = await apiGet('/rent-increase', {
-          currentRent: params.currentRent.toString(),
-          ipc: params.ipc?.toString(),
+      case 'get_mortgage_rates': {
+        const params = GetMortgageRatesSchema.parse(args || {})
+        const data = await apiGet('/mortgage-rates', {
+          bank: params.bank,
+          product: params.product,
         })
-        // POST the data since it needs a body
-        const url = new URL(`${API_BASE}/rent-increase`)
-        const headers: Record<string, string> = {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'User-Agent': `${SERVER_NAME}/${SERVER_VERSION}`,
-        }
-        if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
-        const res = await fetch(url.toString(), {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ currentRent: params.currentRent, ipc: params.ipc }),
-        })
-        if (!res.ok) {
-          const text = await res.text().catch(() => '')
-          throw new Error(`API ${res.status}: ${text.slice(0, 200)}`)
-        }
-        const result = await res.json()
         return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(result, null, 2),
-          }],
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
         }
       }
 
@@ -429,14 +387,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
       }
 
-      case 'get_mortgage_rates': {
-        const params = GetMortgageRatesSchema.parse(args || {})
-        const data = await apiGet('/mortgage-rates', {
-          bank: params.bank,
-          product: params.product,
+      case 'calculate_rent_increase': {
+        // POST: the endpoint takes a body (currentRent, optional ipc)
+        const params = CalculateRentIncreaseSchema.parse(args || {})
+        const url = new URL(`${API_BASE}/rent-increase`)
+        const headers: Record<string, string> = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': `${SERVER_NAME}/${SERVER_VERSION}`,
+        }
+        if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
+        const res = await fetch(url.toString(), {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ currentRent: params.currentRent, ipc: params.ipc }),
         })
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          throw new Error(`API ${res.status}: ${text.slice(0, 200)}`)
+        }
+        const result = await res.json()
         return {
-          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+          content: [{
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          }],
         }
       }
 
@@ -445,7 +420,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
   } catch (err) {
     const message = err instanceof z.ZodError
-      ? `Invalid arguments: ${err.issues.map(e => `${e.path.join('.')}: ${e.message}`).join('; ')}`
+      ? `Invalid arguments: ${err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join('; ')}`
       : err instanceof Error ? err.message : 'Unknown error'
     return {
       content: [{ type: 'text', text: `Error: ${message}` }],
@@ -474,12 +449,6 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       name: 'Open Finance Decreto 0368',
       description: 'Summary of Colombia\'s Open Finance decree and how Pequi is building the first real estate data API.',
       mimeType: 'text/markdown',
-    },
-    {
-      uri: 'pequi://colombia-finance',
-      name: 'Colombia Financial Indicators',
-      description: 'Current UVR (daily) and IPC (trailing 12-month) values from the Banco de la República, used for Ley 820 rent adjustments.',
-      mimeType: 'application/json',
     },
   ],
 }))
@@ -519,14 +488,13 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
           '',
           '## Implicaciones para Pequi',
           '',
-          'Pequi está construyendo la **primera API de datos inmobiliarios de Colombia**, empezando por Ibagué y Bogotá. Esto significa:',
+          'Pequi está construyendo la **primera API de datos inmobiliarios de Colombia**, empezando por Ibagué. Esto significa:',
           '',
-          '- Propiedades con filtros por tipo, precio, barrio, estrato, coordenadas GIS',
-          '- 64 barrios de Ibagué + 212 barrios de Bogotá mapeados con estrato',
+          '- Propiedades con filtros por tipo, precio, barrio, estrato, coordenadas',
+          '- 85 barrios de Ibagué mapeados con estrato y GIS',
           '- Precios de referencia por m² (benchmarks de mercado)',
           '- Contratos Ley 820 con firma digital',
           '- Pagos seguros via Wompi',
-          '- Indicadores financieros: UVR e IPC del Banco de la República',
           '',
           '## Modelo de Negocio',
           '',
@@ -541,33 +509,13 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
           '',
           '- Web: https://xpequi.xyz',
           '- Blog: https://xpequi.xyz/blog/open-finance-decreto-0368',
-          '- API Docs: https://xpequi.xyz/developers/api-ref',
+          '- API Docs: pronto en /developers',
         ].join('\n')
         return {
           contents: [{
             uri,
             mimeType: 'text/markdown',
             text: md,
-          }],
-        }
-      }
-
-      case 'pequi://colombia-finance': {
-        const [uvrRes, ipcRes] = await Promise.all([
-          apiGet<{ data: { value: number; date: string; source: string } }>('/uvr').catch(() => ({ data: { value: 428.53, date: '2026-05-14', source: 'api-unavailable' } })),
-          apiGet<{ data: { annualVariation: number; month: string; source: string } }>('/ipc').catch(() => ({ data: { annualVariation: 5.82, month: '2026-05', source: 'api-unavailable' } })),
-        ])
-        const result = {
-          uvr: uvrRes.data,
-          ipc: ipcRes.data,
-          legalBasis: 'Ley 820 de 2003 — Artículo 20',
-          note: 'UVR is used for financial indexation. IPC is the trailing 12-month inflation rate used for rent adjustments.',
-        }
-        return {
-          contents: [{
-            uri,
-            mimeType: 'application/json',
-            text: JSON.stringify(result, null, 2),
           }],
         }
       }
@@ -584,7 +532,10 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 
 async function main() {
   const useStdio = !process.argv.includes('--port')
-  const transportName = useStdio ? 'stdio' : 'SSE'
+  const useStreamable = process.argv.includes('--streamable-http') || process.env.PEQUI_MCP_STREAMABLE === '1'
+  const transportName = useStdio ? 'stdio' : useStreamable ? 'streamable-http' : 'SSE'
+
+  console.error(`[${SERVER_NAME}] MCP protocol revision: ${PROTOCOL_VERSION} (${useStreamable ? 'stateless Streamable HTTP' : 'legacy transport'})`)
 
   console.error(`[${SERVER_NAME}] Starting v${SERVER_VERSION} (${transportName} transport)`)
   console.error(`[${SERVER_NAME}] API: ${API_BASE}${API_KEY ? ' (authenticated)' : ' (unauthenticated, limited)'}`)
@@ -592,41 +543,46 @@ async function main() {
   if (useStdio) {
     const transport = new StdioServerTransport()
     await server.connect(transport)
-    console.error(`[${SERVER_NAME}] Connected via stdio`)
-  } else {
-    // SSE mode: proper transport per connection
-    let sseTransport: SSEServerTransport | null = null
-
+  } else if (useStreamable) {
+    // MCP 2026-07-28: stateless Streamable HTTP — each POST /mcp is self-contained.
+    // Auth is per-request via c402 API key (Authorization: Bearer), no session affinity.
+    const { StreamableHTTPServerTransport } = await import(
+      '@modelcontextprotocol/sdk/server/streamableHttp.js'
+    )
     const httpServer = http.createServer(async (req, res) => {
-      const url = req.url || ''
-
-      // POST to /mcp — forward JSON-RPC message to existing SSE connection
-      if (req.method === 'POST' && url === '/mcp' && sseTransport) {
-        const chunks: Buffer[] = []
-        for await (const chunk of req) chunks.push(chunk)
-        const body = Buffer.concat(chunks).toString()
-        sseTransport.handlePostMessage(req, res, body)
+      const url = new URL(req.url || '/', `http://localhost:${PORT}`)
+      if (url.pathname === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ status: 'ok', server: SERVER_NAME, version: SERVER_VERSION, protocol: PROTOCOL_VERSION }))
         return
       }
-
-      // GET /mcp — establish new SSE connection
-      if (req.method === 'GET' && url === '/mcp') {
-        sseTransport = new SSEServerTransport('/mcp', res)
-        await server.connect(sseTransport)
+      if (url.pathname !== '/mcp') {
+        res.writeHead(404)
+        res.end('Not found')
         return
       }
-
-      // GET /health — simple health check
-      if (req.method === 'GET' && url === '/health') {
+      // Stateless per-request transport instance — safe for horizontal scale.
+      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
+      res.on('close', () => void transport.close())
+      await server.connect(transport)
+      await transport.handleRequest(req, res)
+    })
+    httpServer.listen(PORT, '127.0.0.1', () => {
+      console.error(`[${SERVER_NAME}] Streamable HTTP (2026-07-28) listening on http://localhost:${PORT}/mcp`)
+      console.error(`[${SERVER_NAME}] Health: http://localhost:${PORT}/health`)
+    })
+  } else {
+    const transport = new SSEServerTransport('/mcp', new http.ServerResponse({} as any))
+    // SSE transport handled via HTTP server
+    const httpServer = http.createServer(async (req, res) => {
+      if (req.method === 'GET' && req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ status: 'ok', server: SERVER_NAME, version: SERVER_VERSION }))
         return
       }
-
       res.writeHead(404)
       res.end('Not found')
     })
-
     httpServer.listen(PORT, '127.0.0.1', () => {
       console.error(`[${SERVER_NAME}] SSE server listening on http://localhost:${PORT}/mcp`)
       console.error(`[${SERVER_NAME}] Health: http://localhost:${PORT}/health`)
