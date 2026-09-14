@@ -23,6 +23,7 @@
  *   PEQUI_MCP_PORT   — Port for SSE mode (default: 3100)
  */
 
+import { readFileSync } from 'node:fs'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
@@ -43,8 +44,17 @@ import { fileURLToPath } from 'node:url'
 const API_KEY = process.env.PEQUI_API_KEY || ''
 const API_BASE = process.env.PEQUI_API_URL || 'https://xpequi.xyz/api/v1'
 const PORT = parseInt(process.env.PEQUI_MCP_PORT || '3100', 10)
-const SERVER_NAME = '@MCPVOT/mcp-server'
-const SERVER_VERSION = '0.1.0'
+// Name and version come from package.json so the published artifact and the
+// server's self-report can never disagree (the version had already drifted once).
+const pkg = (() => {
+  try {
+    return JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { name: string; version: string }
+  } catch {
+    return { name: '@mcpvot/mcp-server', version: '0.0.0' }
+  }
+})()
+const SERVER_NAME = pkg.name
+const SERVER_VERSION = pkg.version
 
 // ─── API Client ───────────────────────────────────────────────────
 

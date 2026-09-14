@@ -50,7 +50,7 @@ In Cursor Settings → MCP Servers → Add:
 |-------|-------|
 | Name | `pequi` |
 | Type | `command` |
-| Command | `npx -y pequi-mcp-server` |
+| Command | `npx -y @mcpvot/mcp-server` |
 
 ### VS Code + GitHub Copilot
 
@@ -87,13 +87,13 @@ In Cursor Settings → MCP Servers → Add:
 ### With API Key (higher rate limits)
 
 ```bash
-PEQUI_API_KEY=pk_live_xxx npx -y pequi-mcp-server
+PEQUI_API_KEY=pk_live_xxx npx -y @mcpvot/mcp-server
 ```
 
 ### SSE mode (for custom integrations)
 
 ```bash
-npx -y pequi-mcp-server --port 3100
+npx -y @mcpvot/mcp-server --port 3100
 ```
 
 Then connect to `http://localhost:3100/mcp`.
@@ -101,7 +101,7 @@ Then connect to `http://localhost:3100/mcp`.
 ### Inspect with MCP Inspector
 
 ```bash
-npx -y pequi-mcp-server
+npx -y @mcpvot/mcp-server
 # In another terminal:
 npx @modelcontextprotocol/inspector node node_modules/pequi-mcp-server/dist/index.js
 ```
