@@ -10,7 +10,7 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -22,7 +22,7 @@ jobs:
     needs: typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -34,7 +34,7 @@ jobs:
     needs: typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -44,7 +44,7 @@ jobs:
     needs: typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate OpenAPI spec
         run: |
           if [ -f "docs/api/openapi.yaml" ]; then
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Hardcoded secret check
         run: |
           grep -rn 'sk-[a-zA-Z0-9]\{20,\}' --include="*.ts" --include="*.tsx" --include="*.py" --exclude-dir=node_modules . 2>/dev/null && echo "WARNING: Hardcoded secret found" || echo "No hardcoded secrets"
