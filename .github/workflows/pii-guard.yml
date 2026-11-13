@@ -1,0 +1,25 @@
+name: PII Guard — public repo must stay publishable
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan tracked files for identity / infra / secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the author listing walks full history
+
+      - name: Make scanner executable
+        run: chmod +x scripts/pii-scan.sh
+
+      - name: Run PII scan
+        run: ./scripts/pii-scan.sh

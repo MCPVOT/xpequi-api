@@ -1,11 +1,13 @@
 #!/bin/bash
 # Deploy Loop Engineer cron jobs to Hermes Agent
-# Run from: C:\Users\Organix\pequi
+# Run from the pequi repo root. Override the working directory with
+# PEQUI_WORKDIR if the repo lives somewhere else.
 
 set -euo pipefail
 
 LOOPS_FILE="loop-engineer/loops.json"
 HERMES_CMD="hermes"
+PEQUI_WORKDIR="${PEQUI_WORKDIR:-$PWD}"
 
 echo "📋 Reading loop config from $LOOPS_FILE..."
 
@@ -17,6 +19,8 @@ jq -c '.loops[]' "$LOOPS_FILE" | while IFS= read -r loop; do
     skills=$(echo "$loop" | jq -c '.skills')
     toolsets=$(echo "$loop" | jq -c '.toolsets')
     workdir=$(echo "$loop" | jq -r '.workdir')
+    # loops.json carries a placeholder, never a machine path
+    workdir="${workdir//\$\{PEQUI_WORKDIR\}/$PEQUI_WORKDIR}"
 
     echo "🔧 Creating cron job: $name ($schedule)"
 
