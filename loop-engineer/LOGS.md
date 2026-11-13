@@ -19,5 +19,5 @@ What: Full auth workflow tested. All 7 endpoints live. Signal closed.
 Refs: [[email-verification-dropoff-signal]]
 
 ## 2026-06-20 · Security Sweep: IP/Secret Exposure Audit · [security] #sweep
-What: Full security scan of ALL docs, files, and public repos. Found and removed public IP (161.35.6.94) from 3 files, Tailscale IP from 2 files. xpequi-api (PUBLIC repo) had 1 IP reference in SYSTEM.md — fixed and pushed (commit 1a8c49c). pequi (private repo) had 6 IP references across SYSTEM.md + MASTER.md — all replaced with descriptive references (commit 8f8c60a). Zero secrets, tokens, or credentials found in any file. Zero hardcoded IPs remain.
+What: Full security scan of ALL docs, files, and public repos. Found and removed a public server IP from 3 files and a Tailscale address from 2 files. xpequi-api (PUBLIC repo) had 1 reference in SYSTEM.md — fixed and pushed (commit 1a8c49c). pequi (private repo) had 6 references across SYSTEM.md + MASTER.md — all replaced with descriptive references (commit 8f8c60a). Zero secrets, tokens, or credentials found in any file. Zero hardcoded IPs remain.
 Refs: [[docs/deployment/SYSTEM.md]], [[docs/MASTER.md]], [[xpequi-api/SYSTEM.md]], [[commit:1a8c49c]], [[commit:8f8c60a]]
