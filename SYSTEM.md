@@ -1,7 +1,29 @@
 # Pequi API — System Architecture
 
-> **Version:** 0.3.2 | **Updated:** 2026-05-17
+> **Version:** 0.4.0 | **Updated:** 2026-11-17
 > **Purpose:** Full system context for contributors, AI agents, and advanced integrators.
+
+---
+
+## 0. Current tech stack and agent interfaces
+
+Verified against the running system on 2026-11-17, not from memory.
+
+| Layer | Reality |
+|---|---|
+| API | Next.js 16.2.6 · React 19 · Prisma 6 · PostgreSQL 17 (Neon) · deployed on Vercel |
+| Auth | **Self-hosted** (bcrypt + session cookie). Clerk was removed in June 2026 — any doc mentioning Clerk is stale. |
+| MCP server | `packages/mcp-server` **v0.4.0**, `@modelcontextprotocol/sdk` **1.32.2**, **10 tools** |
+| MCP protocol | Negotiated **`2025-11-25`** (SDK default). Not pinned in code — assert it in a handshake test before claiming a revision. |
+| Credits | **Postgres** (`credit_ledger`, `credit_transactions`). Redis is cache only — a balance must survive a cache wipe. |
+| Payments | Wompi (PSE / Nequi / card) · c402 HTTP 402 challenges |
+| Publishing | PyPI `pequi-api-client` is **live** (0.1.0). The npm packages `pequi-api-client`, `pequi-mcp-server`, `pequi-opencode-plugin` are **unpublished (404)** — install the MCP from this repository, not from `npx`. |
+
+### Agent-facing contract
+
+Agents consume three surfaces, and all three must agree with the code: this file, `docs/api/openapi.yaml`,
+and `llms.txt` served by the API host. Divergence between them is a bug, not a docs nit — an agent that
+follows a wrong instruction fails silently at its first call.
 
 ---
 
