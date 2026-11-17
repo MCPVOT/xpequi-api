@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+# Pre-push gate for MCPVOT/xpequi-api.
+#
+# Every push to main bypasses 4 required status checks
+# ("Bypassed rule violations: 4 of 4 required status checks are expected"),
+# which means the green CI badge never actually ran for that commit. This hook
+# runs the checks that can run locally BEFORE the push leaves the machine, so a
+# bypass is no longer a silent skip.
+#
+# Enable once per clone:
+#   git config core.hooksPath .githooks
+#
+# Checks mirrored from .github/workflows/ci.yml: typecheck, build-sdk,
+# build-python, openapi-validate. A check that cannot run here FAILS the push
+# rather than being skipped — a gate that silently passes is worse than no gate.
+
+set -e
+
+fail() {
+  printf '\n[pre-push] FAILED: %s\n' "$1"
+  printf '[pre-push] Fix it, or push with --no-verify and say why in the commit.\n'
+  exit 1
+}
+
+printf '[pre-push] 1/4 pii scan\n'
+sh scripts/pii-scan.sh || fail "pii scan found a violation"
+
+printf '[pre-push] 2/4 typecheck\n'
+npx tsc --noEmit || fail "typecheck"
+
+printf '[pre-push] 3/4 build sdk\n'
+npm run build --workspace packages/mcp-server >/dev/null 2>&1 || fail "sdk build"
+
+printf '[pre-push] 4/4 openapi validate\n'
+if [ -f docs/api/openapi.yaml ]; then
+  node -e "
+    const fs=require('fs');
+    const t=fs.readFileSync('docs/api/openapi.yaml','utf8');
+    if(!/^openapi:\s*3\./m.test(t)) { console.error('missing openapi: 3.x header'); process.exit(1); }
+    if(!/^paths:/m.test(t)) { console.error('missing paths:'); process.exit(1); }
+    console.log('openapi header + paths present');
+  " || fail "openapi validate"
+else
+  fail "docs/api/openapi.yaml missing"
+fi
+
+printf '[pre-push] all checks passed\n'
