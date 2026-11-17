@@ -15,7 +15,7 @@
  *   pequi-mcp              # stdio mode (for Cursor, Claude Desktop)
  *   PEQUI_API_KEY=xxx pequi-mcp
  *   pequi-mcp --port 3100  # SSE mode (for custom servers)
- *   pequi-mcp --port 3100 --streamable-http  # MCP 2026-07-28 stateless Streamable HTTP
+ *   pequi-mcp --port 3100 --streamable-http  # MCP 2025-11-25 stateless Streamable HTTP
  *
  * Environment:
  *   PEQUI_API_KEY    — API key for authenticated requests (free tier works)
@@ -25,6 +25,7 @@
 
 import { readFileSync } from 'node:fs'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { LATEST_PROTOCOL_VERSION } from '@modelcontextprotocol/sdk/types.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
 import {
@@ -259,7 +260,20 @@ const TOOLS = [
 // MCP protocol revision: 2026-07-28 (stateless servers, Streamable HTTP).
 // The SDK negotiates the highest mutually-supported version during initialize;
 // declaring it here advertises c402's MCP surface as latest-spec.
-const PROTOCOL_VERSION = '2026-07-28'
+const PROTOCOL_VERSION = '2025-11-25'
+
+// Protocol revision this server is verified against. The SDK negotiates its own
+// default, so a dependency bump could silently move us off the revision the
+// handshake probe asserts. This makes the mismatch loud instead of silent.
+const EXPECTED_PROTOCOL_VERSION = '2025-11-25'
+
+if (LATEST_PROTOCOL_VERSION !== EXPECTED_PROTOCOL_VERSION) {
+  console.error(
+    `[pequi-mcp] PROTOCOL DRIFT: SDK speaks ${LATEST_PROTOCOL_VERSION}, ` +
+      `this server is verified against ${EXPECTED_PROTOCOL_VERSION}. ` +
+      `Re-run scripts/mcp-probe.mjs before changing EXPECTED_PROTOCOL_VERSION.`,
+  )
+}
 
 const server = new Server(
   { name: SERVER_NAME, version: SERVER_VERSION },
