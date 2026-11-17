@@ -257,7 +257,7 @@ const TOOLS = [
 
 // ─── MCP Server ───────────────────────────────────────────────────
 
-// MCP protocol revision: 2026-07-28 (stateless servers, Streamable HTTP).
+// MCP protocol revision: 2025-11-25 (stateless servers, Streamable HTTP).
 // The SDK negotiates the highest mutually-supported version during initialize;
 // declaring it here advertises c402's MCP surface as latest-spec.
 const PROTOCOL_VERSION = '2025-11-25'
@@ -568,7 +568,7 @@ async function main() {
     const transport = new StdioServerTransport()
     await server.connect(transport)
   } else if (useStreamable) {
-    // MCP 2026-07-28: stateless Streamable HTTP — each POST /mcp is self-contained.
+    // MCP 2025-11-25: stateless Streamable HTTP — each POST /mcp is self-contained.
     // Auth is per-request via c402 API key (Authorization: Bearer), no session affinity.
     const { StreamableHTTPServerTransport } = await import(
       '@modelcontextprotocol/sdk/server/streamableHttp.js'
@@ -592,7 +592,7 @@ async function main() {
       await transport.handleRequest(req, res)
     })
     httpServer.listen(PORT, '127.0.0.1', () => {
-      console.error(`[${SERVER_NAME}] Streamable HTTP (2026-07-28) listening on http://localhost:${PORT}/mcp`)
+      console.error(`[${SERVER_NAME}] Streamable HTTP (2025-11-25) listening on http://localhost:${PORT}/mcp`)
       console.error(`[${SERVER_NAME}] Health: http://localhost:${PORT}/health`)
     })
   } else {
