@@ -75,6 +75,49 @@ Colombia's first public real estate data API — built on **Open Finance (Decret
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Clients
+        A[AI agent / MCP client]
+        B[TypeScript SDK]
+        C[Python SDK]
+        D[curl / Postman]
+    end
+
+    subgraph "xpequi.xyz — Next.js 16"
+        E[/api/v1/* REST/]
+        F[c402 middleware<br/>HTTP 402 challenge]
+        G[API key + scope auth]
+    end
+
+    subgraph Data
+        H[(Neon PostgreSQL 17)]
+        I[BanRep: UVR / IPC]
+        J[IGAC cadastral + UPZ]
+        K[Superfinanciera mortgage rates]
+    end
+
+    subgraph Payments
+        L[Wompi<br/>PSE / Nequi / card]
+        M[Prometeo<br/>Open Finance]
+    end
+
+    A --> E
+    B --> E
+    C --> E
+    D --> E
+    E --> G --> F
+    F -->|credits| H
+    E --> H
+    E --> I
+    E --> J
+    E --> K
+    F --> L
+    E --> M
+```
+
 ## Endpoints overview
 
 All endpoints live under `https://xpequi.xyz/api/v1/`. Full request/response schemas: [`docs/api/openapi.yaml`](docs/api/openapi.yaml) (OpenAPI 3.0.3, importable into Postman).
