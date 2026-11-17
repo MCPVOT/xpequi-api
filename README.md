@@ -53,7 +53,7 @@
 
 Colombia's first public real estate data API — built on **Open Finance (Decreto 0368)**. Search properties, query neighborhoods with estratos, get reference prices per m², valuate properties with AVM, and access live financial indicators (UVR/IPC) from Banco de la Republica.
 
-**31 endpoints** covering:
+**29 live endpoints** (the tables below list 34; five documented routes currently return 404 — see *Publishing status*):
 
 | Capability | Endpoints | Auth |
 |------------|-----------|------|
@@ -224,13 +224,13 @@ Pequi implements the **c402 Protocol** — a Colombian-first HTTP 402 Payment Re
 3. The challenge contains a Wompi checkout URL (PSE, Nequi, Daviplata, credit card)
 4. After payment, credits auto-activate — retry with your API key
 
-**Security model:** SHA-256 webhook verification · UUID v4 single-use nonces · Atomic Redis credit deduction · 24h idempotency guard · **Zero crypto** (no blockchain, no wallets, no RSA)
+**Security model:** SHA-256 webhook verification · UUID v4 single-use nonces · **Postgres-transactional credit deduction** (`credit_ledger` + append-only `credit_transactions`, conditional `UPDATE … WHERE balance > 0`) · 24h idempotency guard · **Zero crypto** (no blockchain, no wallets, no RSA)
 
 **Buy without an API key:**
 
 1. Go to [`/precios`](https://xpequi.xyz/precios)
 2. Click "COMPRAR →" on your tier
-3. Sign in with Clerk (Google, email, magic link)
+3. Sign in with your Pequi account (self-hosted auth — email and password; Clerk was removed in June 2026)
 4. Pay via Wompi — credits/tier activate automatically
 
 ```json
@@ -257,11 +257,17 @@ Full protocol details: [c402 — pagos agénticos sin crypto](https://xpequi.xyz
 
 ## SDKs
 
+> **Publishing status — verified 2026-11-17.** Only the Python package is on a public registry.
+> `pequi-api-client`, `pequi-mcp-server` and `pequi-opencode-plugin` are **not published to npm**
+> (all three return 404), and the JSR and GHCR artefacts do not resolve either. Install those from
+> this repository until the releases are published. Commands below that say `npx` or
+> `npm install` will fail today.
+
 | Package | Install | Description | Status |
 |---------|---------|-------------|--------|
 | **TypeScript SDK** | `npm install pequi-api-client` | 31 methods · full type safety · every endpoint | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
 | **Python SDK** | `pip install pequi-api-client` | 16 sub-APIs · fluent interface · minimal deps | <img src="https://img.shields.io/badge/PyPI-3776ab?style=flat-square&labelColor=0d1117" /> |
-| **MCP Server** | `npx -y pequi-mcp-server` | Claude Desktop · Cursor · Copilot · Smithery | <img src="https://img.shields.io/badge/Ready-00ff88?style=flat-square&labelColor=0d1117" /> |
+| **MCP Server** | from this repo: `packages/mcp-server` (`npm run build && node dist/index.js`) | 10 tools · protocol 2025-11-25 · Claude Desktop, Cursor, Copilot | <img src="https://img.shields.io/badge/Unpublished-e8a33d?style=flat-square&labelColor=0d1117" /> |
 | **OpenClaw Plugin** | `packages/openclaw-plugin/` | Hermes agent gateway (archived — OpenClaw removed from stack May 2026) | <img src="https://img.shields.io/badge/Archived-888?style=flat-square&labelColor=0d1117" /> |
 | **Ollama Tool** | `packages/ollama-tool/` | Local LLM property search via Ollama | <img src="https://img.shields.io/badge/Tool-00e5ff?style=flat-square&labelColor=0d1117" /> |
 | **OpenCode Plugin** | `opencode plugin install pequi-opencode-plugin` | Agent plugin for OpenCode | <img src="https://img.shields.io/badge/Plugin-00e5ff?style=flat-square&labelColor=0d1117" /> |
@@ -425,7 +431,7 @@ except PequiApiError as e:
 npm install pequi-api-client
 
 # MCP server (Claude, Cursor, Copilot)
-npx -y pequi-mcp-server
+node packages/mcp-server/dist/index.js
 ```
 
 #### 2. JSR
@@ -619,12 +625,12 @@ Available inside every major AI assistant and coding agent:
 
 | Agent | How to Connect | Install |
 |-------|---------------|---------|
-| **Claude Desktop** | MCP Server | `npx -y pequi-mcp-server` |
+| **Claude Desktop** | MCP Server | `node packages/mcp-server/dist/index.js` |
 | **Claude Code** | MCP config | [`docs/claude-code-integration.md`](docs/claude-code-integration.md) |
-| **Cursor** | MCP Server | `npx -y pequi-mcp-server` |
-| **VS Code Copilot** | MCP Server | `npx -y pequi-mcp-server` |
+| **Cursor** | MCP Server | `node packages/mcp-server/dist/index.js` |
+| **VS Code Copilot** | MCP Server | `node packages/mcp-server/dist/index.js` |
 | **ChatGPT** | Custom GPT Action | [`docs/api/custom-gpt/gpt-action.json`](docs/api/custom-gpt/gpt-action.json) |
-| **Perplexity** | MCP Server | `npx -y pequi-mcp-server` |
+| **Perplexity** | MCP Server | `node packages/mcp-server/dist/index.js` |
 | **Z.AI (GLM-5.1)** | MCP Server | `npx -y robertcprice/glm-mcp-server` |
 | **Qwen 3.6 Plus** | MCP Server | `npx -y @iflow-mcp/gy920-qwen-mcp-tool` |
 | **OpenRouter** | MCP Server | `npx -y @stabgan/openrouter-mcp-multimodal` |
