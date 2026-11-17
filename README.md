@@ -378,7 +378,16 @@ try {
 
 ### Python SDK
 
-Fluent sub-API design with 16 domains. Minimal dependencies (`urllib3`, `python-dateutil`, `certifi`):
+Fluent sub-API design. Minimal dependencies (`urllib3`, `python-dateutil`, `certifi`):
+
+> **Version skew — verified 2026-11-17.** `pip install pequi-api-client` currently installs **0.1.0**,
+> while `packages/python-sdk` in this repository is **0.3.1**. The published 0.1.0 exposes 7 sub-APIs and
+> **has no `PequiApiError`**, so the example below (written against 0.3.1) will fail on import until 0.3.1
+> is published. Install from the repository for the current API:
+>
+> ```bash
+> pip install ./packages/python-sdk
+> ```
 
 ```bash
 pip install pequi-api-client
